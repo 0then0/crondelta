@@ -4,12 +4,14 @@ set -eu
 uv sync --locked
 uv run --no-sync ruff check src tests scripts
 uv run --no-sync ruff format --check src tests scripts
+uv run --no-sync python scripts/check_release.py
 uv build
 scratch=$(mktemp -d)
 trap 'rm -rf "$scratch"' EXIT
 runtime=$(uv run --no-sync python -c 'import sys; print(sys.executable)')
+version=$(uv run --no-sync python -c 'from crondelta import __version__; print(__version__)')
 uv venv --python "$runtime" "$scratch/installed"
-uv pip install --python "$scratch/installed/bin/python" dist/crondelta-0.1.0-py3-none-any.whl
+uv pip install --python "$scratch/installed/bin/python" "dist/crondelta-$version-py3-none-any.whl"
 uv venv --python "$runtime" "$scratch/historical"
 uv pip install --python "$scratch/historical/bin/python" \
   croniter==6.0.0 APScheduler==3.11.2 tzdata==2026.2

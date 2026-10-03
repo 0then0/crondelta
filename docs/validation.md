@@ -13,7 +13,8 @@ sh scripts/verify.sh
 ```
 
 The helper synchronizes the locked development environment, checks Ruff lint
-and formatting, builds the wheel and source distribution, and runs pytest with
+and formatting, validates package version consistency, builds the wheel and
+source distribution, and runs pytest with
 Hypothesis. It also installs the wheel into a disposable environment and tests
 the module and console command outside the checkout.
 
@@ -75,6 +76,7 @@ The suite covers:
   limits, and the actual manifest byte limit for files and pipes.
 - Independent interpreters, installed-package invocation, builds, and the
   [migration reproduction controls](query-exporter.md).
+- Release tag/version matching and runtime/package version consistency.
 
 ## Support boundaries
 
@@ -88,4 +90,6 @@ policies, and full query-exporter application behavior are not covered by those
 results. Consult the [enumeration contract](protocol.md#enumeration-contract)
 when investigating a difference near DST or an incomplete search.
 
-CI verifies the package; it has no package publication, release, or tagging step.
+CI verifies the package on pushes and pull requests. A separate workflow
+publishes PyPI distributions after a GitHub Release is published and verified.
+See the [publishing guide](publishing.md) for setup and release instructions.

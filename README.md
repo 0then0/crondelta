@@ -1,10 +1,11 @@
-<p><img src="docs/assets/crondelta.svg" width="96" height="96" alt="CronDelta: two schedules with a differing occurrence inside a clock"></p>
+<p><img src="https://raw.githubusercontent.com/0then0/crondelta/refs/heads/main/docs/assets/crondelta.svg" width="96" height="96" alt="CronDelta: two schedules with a differing occurrence inside a clock"></p>
 
 # CronDelta
 
 [![CI](https://img.shields.io/github/actions/workflow/status/0then0/crondelta/ci.yml?branch=main&style=flat)](https://github.com/0then0/crondelta/actions/workflows/ci.yml)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB?style=flat)](pyproject.toml)
-[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-64748b?style=flat)](LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/crondelta?style=flat)](https://pypi.org/project/crondelta/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB?style=flat)](https://github.com/0then0/crondelta/blob/main/pyproject.toml)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-64748b?style=flat)](https://github.com/0then0/crondelta/blob/main/LICENSE)
 
 **Compare actual cron engines before changing the library behind your schedules.**
 
@@ -15,11 +16,11 @@ versions and timezone data used, and whether the window was fully checked.
 
 ## Quick start
 
-Use Python 3.11+ and [uv](https://docs.astral.sh/uv/). From the repository root:
+Use Python 3.11+ and [uv](https://docs.astral.sh/uv/). Install the CLI from PyPI:
 
 ```sh
-uv sync --locked
-uv run crondelta compare \
+uv tool install crondelta
+crondelta compare \
   --left-engine croniter --left-version 6.2.4 \
   --right-engine apscheduler --right-version 3.11.3 \
   --expression '0 9 1 * mon' --timezone UTC \
@@ -39,12 +40,15 @@ A difference can reflect an intentional library contract.
 For JSON output, add `--format json`. For multiple schedules:
 
 ```sh
-uv run crondelta compare --manifest examples/migration.json --format json
+crondelta compare --manifest examples/migration.json --format json
 ```
 
-Install the CLI for use outside the checkout:
+The [example manifests](https://github.com/0then0/crondelta/tree/main/examples/) are in the repository. To build and install
+from source instead:
 
 ```sh
+git clone https://github.com/0then0/crondelta.git
+cd crondelta
 uv build
 uv tool install ./dist/crondelta-0.1.0-py3-none-any.whl
 crondelta --version
@@ -80,15 +84,17 @@ convert expressions or repair migrations automatically.
 
 ## Documentation
 
-- [CLI reference](docs/usage.md): profiles, manifests, limits, exit codes, and
+- [CLI reference](https://github.com/0then0/crondelta/blob/main/docs/usage.md): profiles, manifests, limits, exit codes, and
   interpreting incomplete results.
-- [Report and adapter protocol](docs/protocol.md): JSON fields, evidence, and
+- [Report and adapter protocol](https://github.com/0then0/crondelta/blob/main/docs/protocol.md): JSON fields, evidence, and
   the enumeration contract, including start boundaries and DST.
-- [query-exporter migration case study](docs/query-exporter.md): pinned upstream
+- [query-exporter migration case study](https://github.com/0then0/crondelta/blob/main/docs/query-exporter.md): pinned upstream
   sources, controlled differences, and reproduction commands.
-- [Testing and support](docs/validation.md): verification commands, CI matrix,
+- [Publishing guide](https://github.com/0then0/crondelta/blob/main/docs/publishing.md): Trusted Publishing setup and the
+  release process.
+- [Testing and support](https://github.com/0then0/crondelta/blob/main/docs/validation.md): verification commands, CI matrix,
   and tested behavior.
-- [Example manifests](examples/) and [representative JSON reports](examples/reports/).
+- [Example manifests](https://github.com/0then0/crondelta/tree/main/examples/) and [representative JSON reports](https://github.com/0then0/crondelta/tree/main/examples/reports/).
 
 ## Related tools
 
@@ -103,11 +109,15 @@ for a specific time window.
 
 ## Development
 
+From a checkout:
+
 ```sh
+uv sync --locked
+uv run crondelta --version
 sh scripts/verify.sh
 ```
 
 This runs linting, tests, wheel/sdist builds, installed-package checks, and
-reproduction controls. See [Testing and support](docs/validation.md) for details.
+reproduction controls. See [Testing and support](https://github.com/0then0/crondelta/blob/main/docs/validation.md) for details.
 
-Licensed under [Apache-2.0](LICENSE).
+Licensed under [Apache-2.0](https://github.com/0then0/crondelta/blob/main/LICENSE).

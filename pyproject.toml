@@ -21,6 +21,12 @@ classifiers = [
   "Programming Language :: Python :: 3.14",
 ]
 
+[project.urls]
+Homepage = "https://github.com/0then0/crondelta"
+Repository = "https://github.com/0then0/crondelta"
+Documentation = "https://github.com/0then0/crondelta/tree/main/docs"
+Issues = "https://github.com/0then0/crondelta/issues"
+
 [project.scripts]
 crondelta = "crondelta.cli:main"
 

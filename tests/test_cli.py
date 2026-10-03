@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from crondelta import __version__
 from crondelta.cli import main
 from crondelta.comparison import compare
 from crondelta.config import InvalidInput, Limits, UnsupportedScope, utc_datetime
@@ -273,4 +274,4 @@ def test_installed_package_outside_checkout(tmp_path):
         text=True,
         check=True,
     )
-    assert child.stdout.strip() == "CronDelta 0.1.0"
+    assert child.stdout.strip() == f"CronDelta {__version__}"
