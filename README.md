@@ -90,8 +90,6 @@ convert expressions or repair migrations automatically.
   the enumeration contract, including start boundaries and DST.
 - [query-exporter migration case study](https://github.com/0then0/crondelta/blob/main/docs/query-exporter.md): pinned upstream
   sources, controlled differences, and reproduction commands.
-- [Publishing guide](https://github.com/0then0/crondelta/blob/main/docs/publishing.md): Trusted Publishing setup and the
-  release process.
 - [Testing and support](https://github.com/0then0/crondelta/blob/main/docs/validation.md): verification commands, CI matrix,
   and tested behavior.
 - [Example manifests](https://github.com/0then0/crondelta/tree/main/examples/) and [representative JSON reports](https://github.com/0then0/crondelta/tree/main/examples/reports/).

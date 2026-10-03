@@ -92,4 +92,3 @@ when investigating a difference near DST or an incomplete search.
 
 CI verifies the package on pushes and pull requests. A separate workflow
 publishes PyPI distributions after a GitHub Release is published and verified.
-See the [publishing guide](publishing.md) for setup and release instructions.
