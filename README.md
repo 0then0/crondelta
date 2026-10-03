@@ -16,10 +16,12 @@ versions and timezone data used, and whether the window was fully checked.
 
 ## Quick start
 
-Use Python 3.11+ and [uv](https://docs.astral.sh/uv/). Install the CLI from PyPI:
+Use Python 3.11+ and [uv](https://docs.astral.sh/uv/). Install the released CLI
+from PyPI. If the release is not yet available there, use the source installation
+below.
 
 ```sh
-uv tool install crondelta
+uv tool install crondelta==0.1.0
 crondelta compare \
   --left-engine croniter --left-version 6.2.4 \
   --right-engine apscheduler --right-version 3.11.3 \
@@ -37,14 +39,17 @@ exit code **0**. This means the streams match throughout the checked
 **`[start, end)`** window; it makes no claim about dates outside that window.
 A difference can reflect an intentional library contract.
 
-For JSON output, add `--format json`. For multiple schedules:
+For JSON output, add `--format json`. For multiple schedules, download the
+[migration manifest](https://raw.githubusercontent.com/0then0/crondelta/refs/heads/main/examples/migration.json)
+and save it as `migration.json` in your current directory, then run:
 
 ```sh
-crondelta compare --manifest examples/migration.json --format json
+crondelta compare --manifest migration.json --format json
 ```
 
-The [example manifests](https://github.com/0then0/crondelta/tree/main/examples/) are in the repository. To build and install
-from source instead:
+The installed CLI does not include example manifests. More
+[example manifests](https://github.com/0then0/crondelta/tree/main/examples/) are in
+the repository. To build and install from source instead:
 
 ```sh
 git clone https://github.com/0then0/crondelta.git
