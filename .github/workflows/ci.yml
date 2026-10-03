@@ -1,0 +1,25 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-26.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.13', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Verify engines, resources, controls, and installed wheel
+        env:
+          UV_PYTHON: ${{ matrix.python }}
+        run: sh scripts/verify.sh

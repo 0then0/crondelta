@@ -1,0 +1,30 @@
+[
+  {
+    "engine": "apscheduler",
+    "actual_version": "3.11.2",
+    "expression": "0 9 1 * mon",
+    "tzdata_version": "2026.2",
+    "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+    "occurrences": []
+  },
+  {
+    "engine": "apscheduler",
+    "actual_version": "3.11.2",
+    "expression": "0 9 * * 0",
+    "tzdata_version": "2026.2",
+    "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+    "occurrences": [
+      "2026-10-05T09:00:00.000000Z"
+    ]
+  },
+  {
+    "engine": "apscheduler",
+    "actual_version": "3.11.2",
+    "expression": "0 9 * * mon",
+    "tzdata_version": "2026.2",
+    "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+    "occurrences": [
+      "2026-10-05T09:00:00.000000Z"
+    ]
+  }
+]

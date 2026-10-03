@@ -1,0 +1,582 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "schema_version": 1,
+      "name": "dom_dow",
+      "outcome": "DIFFERENT",
+      "reason": "one fully checked stream ends before the other's next occurrence",
+      "profiles": {
+        "left": {
+          "requested": {
+            "engine": "croniter",
+            "expression": "0 9 1 * mon",
+            "options": {
+              "day_or": true,
+              "max_years_between_matches": 50
+            },
+            "python": "/tmp/crondelta-historical/bin/python",
+            "version": "6.0.0"
+          },
+          "resolved": {
+            "engine": "croniter",
+            "expression": "0 9 1 * mon",
+            "options": {
+              "day_or": true,
+              "max_years_between_matches": 50
+            },
+            "python": "/tmp/crondelta-historical/bin/python",
+            "version": "6.0.0",
+            "requested_version": "6.0.0",
+            "actual_version": "6.0.0",
+            "interpreter": "/tmp/crondelta-historical/bin/python",
+            "runtime": {
+              "implementation": "CPython",
+              "version": "3.13.15"
+            },
+            "timezone": {
+              "provider": "tzdata",
+              "tzdata_version": "2026.2",
+              "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+              "key": "UTC",
+              "zoneinfo_tzpath": []
+            }
+          }
+        },
+        "right": {
+          "requested": {
+            "engine": "apscheduler",
+            "expression": "0 9 1 * mon",
+            "options": {},
+            "python": "/tmp/crondelta-historical/bin/python",
+            "version": "3.11.2"
+          },
+          "resolved": {
+            "engine": "apscheduler",
+            "expression": "0 9 1 * mon",
+            "options": {},
+            "python": "/tmp/crondelta-historical/bin/python",
+            "version": "3.11.2",
+            "requested_version": "3.11.2",
+            "actual_version": "3.11.2",
+            "interpreter": "/tmp/crondelta-historical/bin/python",
+            "runtime": {
+              "implementation": "CPython",
+              "version": "3.13.15"
+            },
+            "timezone": {
+              "provider": "tzdata",
+              "tzdata_version": "2026.2",
+              "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+              "key": "UTC",
+              "zoneinfo_tzpath": []
+            }
+          }
+        }
+      },
+      "window": {
+        "start": "2026-10-01T00:00:00.000000Z",
+        "end": "2026-11-01T00:00:00.000000Z",
+        "bounds": "[start, end)",
+        "timezone": "UTC"
+      },
+      "completeness": {
+        "window_checked": true,
+        "left": {
+          "complete": true,
+          "accepted": true,
+          "count": 5,
+          "observed_count": 5,
+          "termination_reason": "complete",
+          "diagnostics": {
+            "detail": "next occurrence is at or beyond exclusive end",
+            "stderr": "",
+            "returncode": 0
+          }
+        },
+        "right": {
+          "complete": true,
+          "accepted": true,
+          "count": 0,
+          "observed_count": 0,
+          "termination_reason": "complete",
+          "diagnostics": {
+            "detail": "next occurrence is at or beyond exclusive end",
+            "stderr": "",
+            "returncode": 0
+          }
+        }
+      },
+      "limits": {
+        "deadline_seconds": 10.0,
+        "max_occurrences": 10000,
+        "stdout_bytes": 8388608,
+        "stderr_bytes": 65536,
+        "context": 2
+      },
+      "termination_reason": {
+        "left": "complete",
+        "right": "complete"
+      },
+      "occurrence_counts": {
+        "left": 5,
+        "right": 0
+      },
+      "empty_window": false,
+      "first_divergence": {
+        "kind": "occurrence",
+        "index": 0,
+        "left": {
+          "local": "2026-10-01T09:00:00.000000+00:00",
+          "utc": "2026-10-01T09:00:00.000000Z",
+          "offset_seconds": 0,
+          "fold": 0,
+          "roundtrip_local": "2026-10-01T09:00:00.000000+00:00",
+          "roundtrip_fold": 0,
+          "nonexistent_local": false
+        },
+        "right": null
+      },
+      "context": {
+        "left": [
+          {
+            "index": 0,
+            "local": "2026-10-01T09:00:00.000000+00:00",
+            "utc": "2026-10-01T09:00:00.000000Z",
+            "offset_seconds": 0,
+            "fold": 0,
+            "roundtrip_local": "2026-10-01T09:00:00.000000+00:00",
+            "roundtrip_fold": 0,
+            "nonexistent_local": false
+          },
+          {
+            "index": 1,
+            "local": "2026-10-05T09:00:00.000000+00:00",
+            "utc": "2026-10-05T09:00:00.000000Z",
+            "offset_seconds": 0,
+            "fold": 0,
+            "roundtrip_local": "2026-10-05T09:00:00.000000+00:00",
+            "roundtrip_fold": 0,
+            "nonexistent_local": false
+          },
+          {
+            "index": 2,
+            "local": "2026-10-12T09:00:00.000000+00:00",
+            "utc": "2026-10-12T09:00:00.000000Z",
+            "offset_seconds": 0,
+            "fold": 0,
+            "roundtrip_local": "2026-10-12T09:00:00.000000+00:00",
+            "roundtrip_fold": 0,
+            "nonexistent_local": false
+          }
+        ],
+        "right": []
+      },
+      "timezone_provenance": {
+        "left": {
+          "provider": "tzdata",
+          "tzdata_version": "2026.2",
+          "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+          "key": "UTC",
+          "zoneinfo_tzpath": []
+        },
+        "right": {
+          "provider": "tzdata",
+          "tzdata_version": "2026.2",
+          "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+          "key": "UTC",
+          "zoneinfo_tzpath": []
+        }
+      },
+      "adapter_diagnostics": {
+        "left": {
+          "detail": "next occurrence is at or beyond exclusive end",
+          "stderr": "",
+          "returncode": 0
+        },
+        "right": {
+          "detail": "next occurrence is at or beyond exclusive end",
+          "stderr": "",
+          "returncode": 0
+        }
+      }
+    },
+    {
+      "schema_version": 1,
+      "name": "numeric_weekday",
+      "outcome": "DIFFERENT",
+      "reason": "first unequal UTC occurrence in checked prefixes",
+      "profiles": {
+        "left": {
+          "requested": {
+            "engine": "croniter",
+            "expression": "0 9 * * 0",
+            "options": {
+              "day_or": true,
+              "max_years_between_matches": 50
+            },
+            "python": "/tmp/crondelta-historical/bin/python",
+            "version": "6.0.0"
+          },
+          "resolved": {
+            "engine": "croniter",
+            "expression": "0 9 * * 0",
+            "options": {
+              "day_or": true,
+              "max_years_between_matches": 50
+            },
+            "python": "/tmp/crondelta-historical/bin/python",
+            "version": "6.0.0",
+            "requested_version": "6.0.0",
+            "actual_version": "6.0.0",
+            "interpreter": "/tmp/crondelta-historical/bin/python",
+            "runtime": {
+              "implementation": "CPython",
+              "version": "3.13.15"
+            },
+            "timezone": {
+              "provider": "tzdata",
+              "tzdata_version": "2026.2",
+              "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+              "key": "UTC",
+              "zoneinfo_tzpath": []
+            }
+          }
+        },
+        "right": {
+          "requested": {
+            "engine": "apscheduler",
+            "expression": "0 9 * * 0",
+            "options": {},
+            "python": "/tmp/crondelta-historical/bin/python",
+            "version": "3.11.2"
+          },
+          "resolved": {
+            "engine": "apscheduler",
+            "expression": "0 9 * * 0",
+            "options": {},
+            "python": "/tmp/crondelta-historical/bin/python",
+            "version": "3.11.2",
+            "requested_version": "3.11.2",
+            "actual_version": "3.11.2",
+            "interpreter": "/tmp/crondelta-historical/bin/python",
+            "runtime": {
+              "implementation": "CPython",
+              "version": "3.13.15"
+            },
+            "timezone": {
+              "provider": "tzdata",
+              "tzdata_version": "2026.2",
+              "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+              "key": "UTC",
+              "zoneinfo_tzpath": []
+            }
+          }
+        }
+      },
+      "window": {
+        "start": "2026-10-01T00:00:00.000000Z",
+        "end": "2026-10-08T00:00:00.000000Z",
+        "bounds": "[start, end)",
+        "timezone": "UTC"
+      },
+      "completeness": {
+        "window_checked": true,
+        "left": {
+          "complete": true,
+          "accepted": true,
+          "count": 1,
+          "observed_count": 1,
+          "termination_reason": "complete",
+          "diagnostics": {
+            "detail": "next occurrence is at or beyond exclusive end",
+            "stderr": "",
+            "returncode": 0
+          }
+        },
+        "right": {
+          "complete": true,
+          "accepted": true,
+          "count": 1,
+          "observed_count": 1,
+          "termination_reason": "complete",
+          "diagnostics": {
+            "detail": "next occurrence is at or beyond exclusive end",
+            "stderr": "",
+            "returncode": 0
+          }
+        }
+      },
+      "limits": {
+        "deadline_seconds": 10.0,
+        "max_occurrences": 10000,
+        "stdout_bytes": 8388608,
+        "stderr_bytes": 65536,
+        "context": 2
+      },
+      "termination_reason": {
+        "left": "complete",
+        "right": "complete"
+      },
+      "occurrence_counts": {
+        "left": 1,
+        "right": 1
+      },
+      "empty_window": false,
+      "first_divergence": {
+        "kind": "occurrence",
+        "index": 0,
+        "left": {
+          "local": "2026-10-04T09:00:00.000000+00:00",
+          "utc": "2026-10-04T09:00:00.000000Z",
+          "offset_seconds": 0,
+          "fold": 0,
+          "roundtrip_local": "2026-10-04T09:00:00.000000+00:00",
+          "roundtrip_fold": 0,
+          "nonexistent_local": false
+        },
+        "right": {
+          "local": "2026-10-05T09:00:00.000000+00:00",
+          "utc": "2026-10-05T09:00:00.000000Z",
+          "offset_seconds": 0,
+          "fold": 0,
+          "roundtrip_local": "2026-10-05T09:00:00.000000+00:00",
+          "roundtrip_fold": 0,
+          "nonexistent_local": false
+        }
+      },
+      "context": {
+        "left": [
+          {
+            "index": 0,
+            "local": "2026-10-04T09:00:00.000000+00:00",
+            "utc": "2026-10-04T09:00:00.000000Z",
+            "offset_seconds": 0,
+            "fold": 0,
+            "roundtrip_local": "2026-10-04T09:00:00.000000+00:00",
+            "roundtrip_fold": 0,
+            "nonexistent_local": false
+          }
+        ],
+        "right": [
+          {
+            "index": 0,
+            "local": "2026-10-05T09:00:00.000000+00:00",
+            "utc": "2026-10-05T09:00:00.000000Z",
+            "offset_seconds": 0,
+            "fold": 0,
+            "roundtrip_local": "2026-10-05T09:00:00.000000+00:00",
+            "roundtrip_fold": 0,
+            "nonexistent_local": false
+          }
+        ]
+      },
+      "timezone_provenance": {
+        "left": {
+          "provider": "tzdata",
+          "tzdata_version": "2026.2",
+          "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+          "key": "UTC",
+          "zoneinfo_tzpath": []
+        },
+        "right": {
+          "provider": "tzdata",
+          "tzdata_version": "2026.2",
+          "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+          "key": "UTC",
+          "zoneinfo_tzpath": []
+        }
+      },
+      "adapter_diagnostics": {
+        "left": {
+          "detail": "next occurrence is at or beyond exclusive end",
+          "stderr": "",
+          "returncode": 0
+        },
+        "right": {
+          "detail": "next occurrence is at or beyond exclusive end",
+          "stderr": "",
+          "returncode": 0
+        }
+      }
+    },
+    {
+      "schema_version": 1,
+      "name": "named_weekday_control",
+      "outcome": "MATCH_WITHIN_WINDOW",
+      "reason": "equal UTC occurrence streams in the fully checked window",
+      "profiles": {
+        "left": {
+          "requested": {
+            "engine": "croniter",
+            "expression": "0 9 * * mon",
+            "options": {
+              "day_or": true,
+              "max_years_between_matches": 50
+            },
+            "python": "/tmp/crondelta-historical/bin/python",
+            "version": "6.0.0"
+          },
+          "resolved": {
+            "engine": "croniter",
+            "expression": "0 9 * * mon",
+            "options": {
+              "day_or": true,
+              "max_years_between_matches": 50
+            },
+            "python": "/tmp/crondelta-historical/bin/python",
+            "version": "6.0.0",
+            "requested_version": "6.0.0",
+            "actual_version": "6.0.0",
+            "interpreter": "/tmp/crondelta-historical/bin/python",
+            "runtime": {
+              "implementation": "CPython",
+              "version": "3.13.15"
+            },
+            "timezone": {
+              "provider": "tzdata",
+              "tzdata_version": "2026.2",
+              "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+              "key": "UTC",
+              "zoneinfo_tzpath": []
+            }
+          }
+        },
+        "right": {
+          "requested": {
+            "engine": "apscheduler",
+            "expression": "0 9 * * mon",
+            "options": {},
+            "python": "/tmp/crondelta-historical/bin/python",
+            "version": "3.11.2"
+          },
+          "resolved": {
+            "engine": "apscheduler",
+            "expression": "0 9 * * mon",
+            "options": {},
+            "python": "/tmp/crondelta-historical/bin/python",
+            "version": "3.11.2",
+            "requested_version": "3.11.2",
+            "actual_version": "3.11.2",
+            "interpreter": "/tmp/crondelta-historical/bin/python",
+            "runtime": {
+              "implementation": "CPython",
+              "version": "3.13.15"
+            },
+            "timezone": {
+              "provider": "tzdata",
+              "tzdata_version": "2026.2",
+              "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+              "key": "UTC",
+              "zoneinfo_tzpath": []
+            }
+          }
+        }
+      },
+      "window": {
+        "start": "2026-10-01T00:00:00.000000Z",
+        "end": "2026-10-08T00:00:00.000000Z",
+        "bounds": "[start, end)",
+        "timezone": "UTC"
+      },
+      "completeness": {
+        "window_checked": true,
+        "left": {
+          "complete": true,
+          "accepted": true,
+          "count": 1,
+          "observed_count": 1,
+          "termination_reason": "complete",
+          "diagnostics": {
+            "detail": "next occurrence is at or beyond exclusive end",
+            "stderr": "",
+            "returncode": 0
+          }
+        },
+        "right": {
+          "complete": true,
+          "accepted": true,
+          "count": 1,
+          "observed_count": 1,
+          "termination_reason": "complete",
+          "diagnostics": {
+            "detail": "next occurrence is at or beyond exclusive end",
+            "stderr": "",
+            "returncode": 0
+          }
+        }
+      },
+      "limits": {
+        "deadline_seconds": 10.0,
+        "max_occurrences": 10000,
+        "stdout_bytes": 8388608,
+        "stderr_bytes": 65536,
+        "context": 2
+      },
+      "termination_reason": {
+        "left": "complete",
+        "right": "complete"
+      },
+      "occurrence_counts": {
+        "left": 1,
+        "right": 1
+      },
+      "empty_window": false,
+      "first_divergence": null,
+      "context": {
+        "left": [
+          {
+            "index": 0,
+            "local": "2026-10-05T09:00:00.000000+00:00",
+            "utc": "2026-10-05T09:00:00.000000Z",
+            "offset_seconds": 0,
+            "fold": 0,
+            "roundtrip_local": "2026-10-05T09:00:00.000000+00:00",
+            "roundtrip_fold": 0,
+            "nonexistent_local": false
+          }
+        ],
+        "right": [
+          {
+            "index": 0,
+            "local": "2026-10-05T09:00:00.000000+00:00",
+            "utc": "2026-10-05T09:00:00.000000Z",
+            "offset_seconds": 0,
+            "fold": 0,
+            "roundtrip_local": "2026-10-05T09:00:00.000000+00:00",
+            "roundtrip_fold": 0,
+            "nonexistent_local": false
+          }
+        ]
+      },
+      "timezone_provenance": {
+        "left": {
+          "provider": "tzdata",
+          "tzdata_version": "2026.2",
+          "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+          "key": "UTC",
+          "zoneinfo_tzpath": []
+        },
+        "right": {
+          "provider": "tzdata",
+          "tzdata_version": "2026.2",
+          "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+          "key": "UTC",
+          "zoneinfo_tzpath": []
+        }
+      },
+      "adapter_diagnostics": {
+        "left": {
+          "detail": "next occurrence is at or beyond exclusive end",
+          "stderr": "",
+          "returncode": 0
+        },
+        "right": {
+          "detail": "next occurrence is at or beyond exclusive end",
+          "stderr": "",
+          "returncode": 0
+        }
+      }
+    }
+  ]
+}

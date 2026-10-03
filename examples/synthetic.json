@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "berlin_gap",
+      "left": {
+        "engine": "croniter",
+        "expression": "30 2 * * *",
+        "version": "6.2.4",
+        "options": {}
+      },
+      "right": {
+        "engine": "apscheduler",
+        "expression": "30 2 * * *",
+        "version": "3.11.3"
+      },
+      "timezone": "Europe/Berlin",
+      "start": "2026-03-28T00:00:00Z",
+      "end": "2026-03-31T00:00:00Z"
+    },
+    {
+      "name": "berlin_fold_control",
+      "left": {
+        "engine": "croniter",
+        "expression": "30 2 * * *",
+        "version": "6.2.4",
+        "options": {}
+      },
+      "right": {
+        "engine": "apscheduler",
+        "expression": "30 2 * * *",
+        "version": "3.11.3"
+      },
+      "timezone": "Europe/Berlin",
+      "start": "2026-10-24T00:00:00Z",
+      "end": "2026-10-27T00:00:00Z"
+    },
+    {
+      "name": "lord_howe_gap",
+      "left": {
+        "engine": "croniter",
+        "expression": "15 2 * * *",
+        "version": "6.2.4",
+        "options": {}
+      },
+      "right": {
+        "engine": "apscheduler",
+        "expression": "15 2 * * *",
+        "version": "3.11.3"
+      },
+      "timezone": "Australia/Lord_Howe",
+      "start": "2026-10-03T00:00:00Z",
+      "end": "2026-10-06T00:00:00Z"
+    },
+    {
+      "name": "synthetic_and_control",
+      "left": {
+        "engine": "croniter",
+        "expression": "0 9 1 * mon",
+        "version": "6.2.4",
+        "options": {
+          "day_or": false
+        }
+      },
+      "right": {
+        "engine": "apscheduler",
+        "expression": "0 9 1 * mon",
+        "version": "3.11.3"
+      },
+      "timezone": "UTC",
+      "start": "2026-10-01T00:00:00Z",
+      "end": "2026-11-01T00:00:00Z"
+    }
+  ]
+}
