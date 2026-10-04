@@ -34,6 +34,8 @@ def main():
         "berlin_fold_control": "MATCH_WITHIN_WINDOW",
         "lord_howe_gap": "DIFFERENT",
         "synthetic_and_control": "MATCH_WITHIN_WINDOW",
+        "croniter_upgrade_zurich_fold": "DIFFERENT",
+        "croniter_upgrade_utc_control": "MATCH_WITHIN_WINDOW",
     }
     for result in reports:
         assert result["outcome"] == expected[result["name"]], result

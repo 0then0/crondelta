@@ -26,5 +26,8 @@ uv run --no-sync python scripts/reproduce.py \
   --left-python "$scratch/historical/bin/python" \
   --right-python "$scratch/historical/bin/python" \
   --left-version 6.0.0 --right-version 3.11.2 --output "$scratch/historical.json"
+uv run --no-sync python scripts/reproduce.py --manifest examples/croniter-upgrade.json \
+  --left-python "$scratch/historical/bin/python" --right-python "$runtime" \
+  --left-version 6.0.0 --right-version 6.2.4 --output "$scratch/croniter-upgrade.json"
 uv run --no-sync python scripts/query_exporter_probe.py --engine croniter > "$scratch/croniter.json"
 uv run --no-sync python scripts/query_exporter_probe.py --engine apscheduler > "$scratch/apscheduler.json"

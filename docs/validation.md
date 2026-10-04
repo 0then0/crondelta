@@ -76,6 +76,8 @@ The suite covers:
   limits, and the actual manifest byte limit for files and pipes.
 - Independent interpreters, installed-package invocation, builds, and the
   [migration reproduction controls](query-exporter.md).
+- The [croniter upgrade case](croniter-upgrade.md): real 6.0.0/6.2.4 streams
+  across Zurich's repeated hour, exact counts and fold evidence, and a UTC control.
 - Release tag/version matching and runtime/package version consistency.
 
 ## Support boundaries

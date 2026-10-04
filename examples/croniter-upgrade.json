@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "croniter_upgrade_zurich_fold",
+      "left": {
+        "engine": "croniter",
+        "expression": "*/5 * * * *",
+        "version": "6.0.0"
+      },
+      "right": {
+        "engine": "croniter",
+        "expression": "*/5 * * * *",
+        "version": "6.2.4"
+      },
+      "timezone": "Europe/Zurich",
+      "start": "2023-10-29T00:55:00Z",
+      "end": "2023-10-29T02:10:00Z"
+    },
+    {
+      "name": "croniter_upgrade_utc_control",
+      "left": {
+        "engine": "croniter",
+        "expression": "*/5 * * * *",
+        "version": "6.0.0"
+      },
+      "right": {
+        "engine": "croniter",
+        "expression": "*/5 * * * *",
+        "version": "6.2.4"
+      },
+      "timezone": "UTC",
+      "start": "2023-10-29T00:55:00Z",
+      "end": "2023-10-29T02:10:00Z"
+    }
+  ]
+}
