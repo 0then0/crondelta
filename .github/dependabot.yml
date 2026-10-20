@@ -4,6 +4,8 @@ version: 2
 updates:
   - package-ecosystem: "uv"
     directory: "/"
+    # Keep the documented engine/tzdata baseline pinned. Change it with its evidence.
+    versioning-strategy: "lockfile-only"
     schedule:
       interval: "monthly"
     open-pull-requests-limit: 1
@@ -19,7 +21,6 @@ updates:
           - "version-update:semver-major"
     commit-message:
       prefix: "chore"
-    # Engine/tzdata updates need review of pinned controls and representative reports.
 
   - package-ecosystem: "github-actions"
     directory: "/"
