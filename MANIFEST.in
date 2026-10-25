@@ -1,7 +1,8 @@
-include uv.lock
+include uv.lock .editorconfig .gitattributes .gitignore
+include CONTRIBUTING.md CODE_OF_CONDUCT.md SECURITY.md CHANGELOG.md
 recursive-include tests *.py
 recursive-include docs *.md
 recursive-include docs/assets *.svg
 recursive-include examples *.json
 recursive-include scripts *.py *.sh
-recursive-include .github/workflows *.yml
+recursive-include .github *.yml *.yaml *.md

@@ -112,6 +112,16 @@ benchmarks JavaScript cron implementations against fixtures.
 CronDelta focuses on two installed Python profiles and reproducible evidence
 for a specific time window.
 
+## Contributing
+
+See [CONTRIBUTING.md](https://github.com/0then0/crondelta/blob/main/CONTRIBUTING.md)
+for setup, validation, and reproducible evidence requirements. Participation
+follows the [Code of Conduct](https://github.com/0then0/crondelta/blob/main/CODE_OF_CONDUCT.md).
+Report vulnerabilities privately as described in
+[SECURITY.md](https://github.com/0then0/crondelta/blob/main/SECURITY.md).
+See [CHANGELOG.md](https://github.com/0then0/crondelta/blob/main/CHANGELOG.md) for
+released and unreleased changes.
+
 ## Development
 
 From a checkout:

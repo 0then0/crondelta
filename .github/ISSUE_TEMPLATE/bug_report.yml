@@ -1,0 +1,51 @@
+name: Bug report
+description: Report a reproducible problem with CronDelta.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For vulnerabilities, follow [SECURITY.md](https://github.com/0then0/crondelta/blob/main/SECURITY.md) instead of posting exploit details here.
+        Remove secrets, production data, and private paths from reports.
+        `DIFFERENT` can describe an intentional engine contract; explain why the CronDelta result appears incorrect.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Problem
+      description: What were you trying to compare, and what went wrong?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include the command or manifest, expressions, timezone, UTC window, and any required interpreter setup.
+      placeholder: Paste a minimal command or manifest using sanitized test data.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+      description: Explain the expected outcome or evidence and the basis for that expectation.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+      description: Include the exit code, relevant JSON report fields, and diagnostics. Describe any redaction.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include CronDelta and Python versions, OS, both actual engine versions, and tzdata/provenance from the report.
+      placeholder: |
+        CronDelta:
+        Python / OS:
+        Left engine / version:
+        Right engine / version:
+        tzdata / timezone provenance:
+    validations:
+      required: true

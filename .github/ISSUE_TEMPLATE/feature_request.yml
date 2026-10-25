@@ -1,0 +1,27 @@
+name: Feature request
+description: Propose a focused improvement to CronDelta.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Read the [supported scope](https://github.com/0then0/crondelta#supported-comparisons) first.
+        Explain the user problem and a concrete schedule-comparison use case.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What can you not currently accomplish? Include an example when possible.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the smallest useful change and its expected result.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and scope
+      description: Describe existing workarounds, alternatives, and anything that can remain outside scope.
