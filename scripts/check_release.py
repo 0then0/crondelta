@@ -33,7 +33,7 @@ def check_release(root: Path, tag: str | None = None) -> str:
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--tag", help="exact GitHub release tag, for example v0.1.0")
+    parser.add_argument("--tag", help="exact GitHub release tag, for example v0.2.0")
     args = parser.parse_args()
     try:
         version = check_release(Path(__file__).resolve().parent.parent, args.tag)

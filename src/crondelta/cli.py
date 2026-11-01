@@ -32,6 +32,16 @@ def parser() -> argparse.ArgumentParser:
         command.add_argument(f"--{side}-options", help="JSON object")
         command.add_argument(f"--{side}-python")
         command.add_argument(f"--{side}-version", help="exact required installed engine version")
+        command.add_argument(
+            f"--{side}-tzdata-version",
+            help="exact required installed tzdata package version (never installed by compare)",
+        )
+    command.add_argument(
+        "--allow-different-tzdata",
+        action="store_const",
+        const=True,
+        help="compare sides that resolve different timezone data instead of reporting UNRESOLVED",
+    )
     command.add_argument("--timezone")
     command.add_argument("--start")
     command.add_argument("--end")
@@ -74,7 +84,7 @@ def load_cases(args) -> list[Case]:
     data = {key: getattr(args, key) for key in ("timezone", "start", "end")}
     for side in ("left", "right"):
         profile = {}
-        for key in ("engine", "expression", "options", "python", "version"):
+        for key in ("engine", "expression", "options", "python", "version", "tzdata_version"):
             value = getattr(args, f"{side}_{key}")
             if key == "expression" and value is None:
                 value = args.expression
@@ -83,6 +93,8 @@ def load_cases(args) -> list[Case]:
         if "engine" not in profile:
             raise InvalidInput(f"--{side}-engine is required")
         data[side] = profile
+    if args.allow_different_tzdata:
+        data["allow_different_tzdata"] = True
     data["limits"] = {
         key: getattr(args, key)
         for key in (
@@ -116,7 +128,8 @@ def main(argv=None) -> int:
                 "MATCH_WITHIN_WINDOW",
             )
             outcome = next(item for item in priority if any(r["outcome"] == item for r in reports))
-            result = {"schema_version": 1, "outcome": outcome, "cases": reports}
+            version = max(report["schema_version"] for report in reports)
+            result = {"schema_version": version, "outcome": outcome, "cases": reports}
         else:
             result = reports[0]
     except UnsupportedScope as exc:

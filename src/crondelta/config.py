@@ -44,12 +44,17 @@ class Profile:
     options: dict[str, Any] = field(default_factory=dict)
     python: str = sys.executable
     version: str | None = None
+    tzdata_version: str | None = None
 
     @classmethod
     def parse(cls, data: dict) -> "Profile":
         if not isinstance(data, dict):
             raise InvalidInput("profile must be an object")
-        keys(data, {"engine", "expression", "options", "python", "version"}, "profile")
+        keys(
+            data,
+            {"engine", "expression", "options", "python", "version", "tzdata_version"},
+            "profile",
+        )
         engine = data.get("engine")
         if not isinstance(engine, str) or not engine:
             raise InvalidInput("profile engine must be a nonempty string")
@@ -89,7 +94,12 @@ class Profile:
             not isinstance(version, str) or not version or len(version) > 128
         ):
             raise InvalidInput("version must be a nonempty string")
-        return cls(engine, expression, resolved_options, python, version)
+        tzdata_version = data.get("tzdata_version")
+        if tzdata_version is not None and (
+            not isinstance(tzdata_version, str) or not tzdata_version or len(tzdata_version) > 128
+        ):
+            raise InvalidInput("tzdata_version must be a nonempty string")
+        return cls(engine, expression, resolved_options, python, version, tzdata_version)
 
 
 @dataclass(frozen=True)
@@ -134,12 +144,26 @@ class Case:
     start: datetime
     end: datetime
     limits: Limits
+    allow_different_tzdata: bool = False
 
     @classmethod
     def parse(cls, data: dict) -> "Case":
         if not isinstance(data, dict):
             raise InvalidInput("case must be an object")
-        keys(data, {"name", "left", "right", "timezone", "start", "end", "limits"}, "case")
+        keys(
+            data,
+            {
+                "name",
+                "left",
+                "right",
+                "timezone",
+                "start",
+                "end",
+                "limits",
+                "allow_different_tzdata",
+            },
+            "case",
+        )
         name = data.get("name", "comparison")
         timezone = data.get("timezone")
         if not isinstance(name, str) or not name or len(name) > 256:
@@ -154,6 +178,9 @@ class Case:
         start, end = utc_datetime(data.get("start")), utc_datetime(data.get("end"))
         if start >= end:
             raise InvalidInput("start must be before end")
+        allow_different_tzdata = data.get("allow_different_tzdata", False)
+        if type(allow_different_tzdata) is not bool:
+            raise InvalidInput("allow_different_tzdata must be boolean")
         # Avoid boundary overflows in public engine APIs.
         if start.year < 2 or end.year > 9998:
             raise UnsupportedScope("v0.1 supports windows within years 0002..9998")
@@ -165,6 +192,7 @@ class Case:
             start,
             end,
             Limits.parse(data.get("limits", {})),
+            allow_different_tzdata,
         )
 
     def request(self, profile: Profile) -> dict:

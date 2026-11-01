@@ -2,17 +2,19 @@
 
 Only stdlib and the selected engine/tzdata are required in the target interpreter.
 Stdout is NDJSON protocol v1; engine diagnostics belong on stderr.
+The time zone is always built from the tzdata wheel bytes that are hashed in the report.
 """
 
 import hashlib
 import importlib.metadata
 import importlib.resources
+import io
 import json
 import platform
 import sys
 import traceback
 from datetime import UTC, datetime, timedelta
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError, reset_tzpath
+from zoneinfo import ZoneInfo, reset_tzpath
 
 
 def emit(kind, **fields):
@@ -45,24 +47,26 @@ def run(request):
     distribution = "APScheduler" if engine == "apscheduler" else "croniter"
     version = importlib.metadata.version(distribution)
     tzversion = importlib.metadata.version("tzdata")
-    # Empty search path forces ZoneInfo to use the wheel, even on hosts with system tzdb.
+    # The zone is built from the very bytes that are hashed below, never from a search path
+    # or the ZoneInfo cache. The empty search path additionally stops engines that resolve a
+    # zone by name from reaching a system tz database.
     reset_tzpath(())
     ZoneInfo.clear_cache()
+    key = request["timezone"]
     try:
-        tzif = (
-            importlib.resources.files("tzdata.zoneinfo")
-            .joinpath(*request["timezone"].split("/"))
-            .read_bytes()
-        )
-        timezone = ZoneInfo(request["timezone"])
-    except (ZoneInfoNotFoundError, FileNotFoundError, IsADirectoryError) as exc:
-        emit("end", status="invalid_timezone", detail=str(exc)[:1000])
+        tzif = importlib.resources.files("tzdata.zoneinfo").joinpath(*key.split("/")).read_bytes()
+        timezone = ZoneInfo.from_file(io.BytesIO(tzif), key=key)
+    except (FileNotFoundError, IsADirectoryError, NotADirectoryError) as exc:
+        detail = f"timezone {key!r} is not available in tzdata {tzversion}: {exc}"
+        emit("end", status="invalid_timezone", detail=detail[:1000])
         return
     provenance = {
         "provider": "tzdata",
+        "source": "tzdata.zoneinfo",
         "tzdata_version": tzversion,
+        "requested_tzdata_version": profile.get("tzdata_version"),
         "tzif_sha256": hashlib.sha256(tzif).hexdigest(),
-        "key": request["timezone"],
+        "key": key,
         "zoneinfo_tzpath": [],
     }
     resolved = {
@@ -79,6 +83,13 @@ def run(request):
     emit("profile", profile=resolved)
     if profile["version"] is not None and profile["version"] != version:
         emit("end", status="version_mismatch", detail="requested engine version is not installed")
+        return
+    if profile.get("tzdata_version") is not None and profile["tzdata_version"] != tzversion:
+        emit(
+            "end",
+            status="tzdata_mismatch",
+            detail=f"requested tzdata {profile['tzdata_version']} but {tzversion} is installed",
+        )
         return
     if engine == "apscheduler" and version.split(".")[0] != "3":
         emit("end", status="unsupported", detail="only APScheduler 3.x is supported")

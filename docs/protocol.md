@@ -4,11 +4,21 @@ Use `--format json` to obtain a versioned CLI report. This reference describes
 the public report fields and the internal worker transport used to produce
 them. For command-line inputs and exit codes, see the [CLI reference](usage.md).
 
-## Report v1
+## Report versions
+
+Reports have `schema_version` **1** unless the case sets `allow_different_tzdata`,
+in which case it is **2**. Version 1 guarantees that `MATCH_WITHIN_WINDOW` and
+`DIFFERENT` come from sides with identical timezone data (the same tzdata version
+and TZif bytes). Version 2 withdraws that guarantee, so a consumer that relies on it
+can reject reports with another version. Fields of both versions are otherwise
+identical. A manifest report has the highest `schema_version` of its cases.
+Manifest input stays at `schema_version: 1`; its new keys are optional.
+
+## Report v1 and v2
 
 Single-case reports contain:
 
-- `schema_version` (integer 1), `name`, `outcome`, and `reason`.
+- `schema_version` (integer 1 or 2), `name`, `outcome`, and `reason`.
 - `profiles.left/right`: `requested` and `resolved` (null if resolution failed).
 - `window`: normalized microsecond UTC `start`/`end`, bounds, and IANA key.
 - `completeness.window_checked`: both streams completed enumeration, independent
@@ -22,10 +32,23 @@ Single-case reports contain:
 - `context.left/right`: indexed evidence around the witness, or the first
   bounded sample when no occurrence witness exists.
 - `timezone_provenance.left/right` and `adapter_diagnostics.left/right`.
+  Provenance contains `provider` (`tzdata`), `source` (`tzdata.zoneinfo`, the
+  package resource; no path), `key`, `tzdata_version` (resolved),
+  `requested_tzdata_version` (or null), `tzif_sha256` of the TZif bytes the zone was
+  built from, and `zoneinfo_tzpath` (always empty). Null when a side has no profile.
+- `timezone_data`: `different_tzdata_allowed`; `status` (`identical`, `different`,
+  or `unresolved` if a side has no profile); and `versions_equal`/`tzif_equal`
+  (null when unresolved).
+- `profile_differences`: `configuration` lists differing `engine`, `expression`,
+  `options`; `provenance` lists differing `engine_version`, `runtime`,
+  `tzdata_version`, `tzif_sha256` (null if a side is unresolved);
+  `timezone_data_only` is true only when `configuration` is empty and `provenance`
+  contains nothing beyond the two timezone data entries. This describes tracked
+  factors only; it does not name a cause for an occurrence difference.
 
-Configuration failures retain the report envelope with unknown profiles,
-window, and limits null, `window_checked: false`, and no witness. Manifest output
-has `schema_version: 1`, aggregated `outcome`, and an ordered `cases` array of
+Configuration failures retain the report envelope (`schema_version` 1) with unknown
+profiles, window, `timezone_data`, `profile_differences`, and limits null, `window_checked: false`, and no witness. Manifest output
+has `schema_version` (see above), aggregated `outcome`, and an ordered `cases` array of
 single-case reports. The reproduction helper saves a `schema_version`/`cases`
 collection without an aggregate verdict; it is an evidence collection, not CLI output.
 
@@ -64,16 +87,18 @@ interpreter needs Python 3.11+, the selected library, its dependencies, and tzda
 need CronDelta installed in that environment.
 
 Stdin is one JSON object: `protocol_version: 1`, `profile`, `timezone`, `start`,
-`end`, `max_occurrences`. The worker reads at most 64 KiB. The coordinator's
+`end`, `max_occurrences`. The profile may pin `tzdata_version`. The worker reads at most 64 KiB. The coordinator's
 validated profiles are smaller than this bound. Stdout is UTF-8 NDJSON, with
 one complete line per record; stderr is diagnostic only.
 
 Each record has integer `protocol_version: 1` and `type`:
 
 1. `profile` contains `profile`, the resolved profile object. Requested fields
-   (`engine`, `expression`, `options`, `python`, `version`) are preserved.
-   `requested_version`, `actual_version`, actual `interpreter`, `runtime`
-   (implementation/version), and `timezone` provenance are added.
+   (`engine`, `expression`, `options`, `python`, `version`, `tzdata_version`) are
+   preserved. `requested_version`, `actual_version`, actual `interpreter`, `runtime`
+   (implementation/version), and `timezone` provenance are added. The worker builds
+   the zone with `ZoneInfo.from_file` from the same wheel bytes whose SHA-256 it
+   reports, after disabling the zoneinfo search path and clearing its cache.
 2. `accepted` confirms successful expression construction through the engine's
    public API. This is needed to distinguish timeout before parsing from acceptance.
 3. Zero or more `occurrence` records contain `occurrence`: `local`, `utc`,
@@ -88,13 +113,24 @@ profile. Public constructor parser exceptions are expected rejections; failures
 during evaluation or unexpected exception types are engine errors.
 
 Terminal worker statuses are `complete`, `rejected`, `search_limit`,
-`occurrence_cap`, `version_mismatch`, `unsupported`, `engine_error`,
+`occurrence_cap`, `version_mismatch`, `tzdata_mismatch`, `unsupported`, `engine_error`,
 `non_advancing`, `non_monotonic`, `invalid_timezone`, `missing_dependency`.
 Transport adds `timeout`, `output_cap`, `protocol_error`, or `engine_error`.
 A naturally nonzero process exit, even after a successful terminal record,
 invalidates the stream. This remains an engine error when a descendant keeps
 the pipes open. Termination by the coordinator to enforce a deadline or output
 limit preserves that resource-limit diagnosis.
+
+The worker emits `version_mismatch` (engine) or else `tzdata_mismatch` right after
+the profile when a pin is unmet, without parsing or enumerating. The coordinator
+rejects a worker that continues after an unmet pin, reports either mismatch status
+without one, or returns provenance with another `source`, a different
+`requested_tzdata_version`, a nonempty search path, or a malformed digest.
+An unavailable zone ends with `invalid_timezone` and names the tzdata version.
+
+Transport v1 itself is unchanged: the worker ships inside the same CronDelta
+package as the coordinator, so these record fields are additive and no separate
+protocol version is needed.
 
 Malformed records, missing terminal records, inconsistent local/UTC evidence,
 extra records after termination, occurrence overflow, changed requested profiles,

@@ -1,0 +1,958 @@
+{
+  "schema_version": 1,
+  "lab": "tzdata-2026.5-to-2026.6",
+  "redaction": "absolute paths of the disposable lab and repository replaced by labels",
+  "commands": [
+    {
+      "argv": [
+        "compare",
+        "--manifest",
+        "<lab>/manifest.json",
+        "--format",
+        "json"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1
+    },
+    {
+      "argv": [
+        "compare",
+        "--format",
+        "json",
+        "--timezone",
+        "America/Havana",
+        "--start",
+        "2026-11-02T00:00:00Z",
+        "--end",
+        "2026-11-04T00:00:00Z",
+        "--expression",
+        "0 9 * * *",
+        "--allow-different-tzdata",
+        "--left-engine",
+        "croniter",
+        "--left-python",
+        "<lab>/tzdata-2026.5/bin/python",
+        "--left-version",
+        "6.2.4",
+        "--left-tzdata-version",
+        "2026.5",
+        "--right-engine",
+        "croniter",
+        "--right-python",
+        "<lab>/tzdata-2026.6/bin/python",
+        "--right-version",
+        "6.2.4",
+        "--right-tzdata-version",
+        "2026.6"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1
+    },
+    {
+      "argv": [
+        "compare",
+        "--format",
+        "json",
+        "--timezone",
+        "Europe/Berlin",
+        "--start",
+        "2026-11-02T00:00:00Z",
+        "--end",
+        "2026-11-04T00:00:00Z",
+        "--expression",
+        "0 9 * * *",
+        "--allow-different-tzdata",
+        "--left-engine",
+        "croniter",
+        "--left-python",
+        "<lab>/tzdata-2026.5/bin/python",
+        "--left-version",
+        "6.2.4",
+        "--left-tzdata-version",
+        "2026.5",
+        "--right-engine",
+        "croniter",
+        "--right-python",
+        "<lab>/tzdata-2026.6/bin/python",
+        "--right-version",
+        "6.2.4",
+        "--right-tzdata-version",
+        "2026.6"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    },
+    {
+      "argv": [
+        "compare",
+        "--format",
+        "json",
+        "--timezone",
+        "UTC",
+        "--start",
+        "2026-11-02T00:00:00Z",
+        "--end",
+        "2026-11-04T00:00:00Z",
+        "--expression",
+        "0 9 * * *",
+        "--allow-different-tzdata",
+        "--left-engine",
+        "croniter",
+        "--left-python",
+        "<lab>/tzdata-2026.5/bin/python",
+        "--left-version",
+        "6.2.4",
+        "--left-tzdata-version",
+        "2026.5",
+        "--right-engine",
+        "croniter",
+        "--right-python",
+        "<lab>/tzdata-2026.6/bin/python",
+        "--right-version",
+        "6.2.4",
+        "--right-tzdata-version",
+        "2026.6"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    },
+    {
+      "argv": [
+        "compare",
+        "--format",
+        "json",
+        "--timezone",
+        "America/Havana",
+        "--start",
+        "2026-11-02T00:00:00Z",
+        "--end",
+        "2026-11-04T00:00:00Z",
+        "--expression",
+        "0 9 * * *",
+        "--left-engine",
+        "croniter",
+        "--left-python",
+        "<lab>/tzdata-2026.5/bin/python",
+        "--left-version",
+        "6.2.4",
+        "--left-tzdata-version",
+        "2026.5",
+        "--right-engine",
+        "croniter",
+        "--right-python",
+        "<lab>/tzdata-2026.6/bin/python",
+        "--right-version",
+        "6.2.4",
+        "--right-tzdata-version",
+        "2026.6"
+      ],
+      "exit_code": 3,
+      "expected_exit_code": 3
+    }
+  ],
+  "independent_control": {
+    "2026.5": {
+      "tzdata_version": "2026.5",
+      "zones": {
+        "America/Havana": {
+          "tzif_sha256": "9ace6b0aeab6c81338f55993ca632d15037773968137596477c8e3cca767366f",
+          "occurrences": [
+            {
+              "local": "2026-11-02T09:00:00.000000-05:00",
+              "utc": "2026-11-02T14:00:00.000000Z"
+            },
+            {
+              "local": "2026-11-03T09:00:00.000000-05:00",
+              "utc": "2026-11-03T14:00:00.000000Z"
+            }
+          ]
+        },
+        "Europe/Berlin": {
+          "tzif_sha256": "a7fd9932d785d4d690900b834c3563c1810c1cf2e01711bcc0926af6c0767cb7",
+          "occurrences": [
+            {
+              "local": "2026-11-02T09:00:00.000000+01:00",
+              "utc": "2026-11-02T08:00:00.000000Z"
+            },
+            {
+              "local": "2026-11-03T09:00:00.000000+01:00",
+              "utc": "2026-11-03T08:00:00.000000Z"
+            }
+          ]
+        },
+        "UTC": {
+          "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+          "occurrences": [
+            {
+              "local": "2026-11-02T09:00:00.000000+00:00",
+              "utc": "2026-11-02T09:00:00.000000Z"
+            },
+            {
+              "local": "2026-11-03T09:00:00.000000+00:00",
+              "utc": "2026-11-03T09:00:00.000000Z"
+            }
+          ]
+        }
+      }
+    },
+    "2026.6": {
+      "tzdata_version": "2026.6",
+      "zones": {
+        "America/Havana": {
+          "tzif_sha256": "d2ba5f8960acb66655c19dfd94de72a07f51cb8ef55f843b801409d460432578",
+          "occurrences": [
+            {
+              "local": "2026-11-02T09:00:00.000000-04:00",
+              "utc": "2026-11-02T13:00:00.000000Z"
+            },
+            {
+              "local": "2026-11-03T09:00:00.000000-04:00",
+              "utc": "2026-11-03T13:00:00.000000Z"
+            }
+          ]
+        },
+        "Europe/Berlin": {
+          "tzif_sha256": "a7fd9932d785d4d690900b834c3563c1810c1cf2e01711bcc0926af6c0767cb7",
+          "occurrences": [
+            {
+              "local": "2026-11-02T09:00:00.000000+01:00",
+              "utc": "2026-11-02T08:00:00.000000Z"
+            },
+            {
+              "local": "2026-11-03T09:00:00.000000+01:00",
+              "utc": "2026-11-03T08:00:00.000000Z"
+            }
+          ]
+        },
+        "UTC": {
+          "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+          "occurrences": [
+            {
+              "local": "2026-11-02T09:00:00.000000+00:00",
+              "utc": "2026-11-02T09:00:00.000000Z"
+            },
+            {
+              "local": "2026-11-03T09:00:00.000000+00:00",
+              "utc": "2026-11-03T09:00:00.000000Z"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "report": {
+    "schema_version": 2,
+    "outcome": "DIFFERENT",
+    "cases": [
+      {
+        "schema_version": 2,
+        "name": "tzdata_havana_rules",
+        "outcome": "DIFFERENT",
+        "reason": "first unequal UTC occurrence in checked prefixes",
+        "profiles": {
+          "left": {
+            "requested": {
+              "engine": "croniter",
+              "expression": "0 9 * * *",
+              "options": {
+                "day_or": true,
+                "max_years_between_matches": 50
+              },
+              "python": "<lab>/tzdata-2026.5/bin/python",
+              "version": "6.2.4",
+              "tzdata_version": "2026.5"
+            },
+            "resolved": {
+              "engine": "croniter",
+              "expression": "0 9 * * *",
+              "options": {
+                "day_or": true,
+                "max_years_between_matches": 50
+              },
+              "python": "<lab>/tzdata-2026.5/bin/python",
+              "version": "6.2.4",
+              "tzdata_version": "2026.5",
+              "requested_version": "6.2.4",
+              "actual_version": "6.2.4",
+              "interpreter": "<lab>/tzdata-2026.5/bin/python",
+              "runtime": {
+                "implementation": "CPython",
+                "version": "3.13.18"
+              },
+              "timezone": {
+                "provider": "tzdata",
+                "source": "tzdata.zoneinfo",
+                "tzdata_version": "2026.5",
+                "requested_tzdata_version": "2026.5",
+                "tzif_sha256": "9ace6b0aeab6c81338f55993ca632d15037773968137596477c8e3cca767366f",
+                "key": "America/Havana",
+                "zoneinfo_tzpath": []
+              }
+            }
+          },
+          "right": {
+            "requested": {
+              "engine": "croniter",
+              "expression": "0 9 * * *",
+              "options": {
+                "day_or": true,
+                "max_years_between_matches": 50
+              },
+              "python": "<lab>/tzdata-2026.6/bin/python",
+              "version": "6.2.4",
+              "tzdata_version": "2026.6"
+            },
+            "resolved": {
+              "engine": "croniter",
+              "expression": "0 9 * * *",
+              "options": {
+                "day_or": true,
+                "max_years_between_matches": 50
+              },
+              "python": "<lab>/tzdata-2026.6/bin/python",
+              "version": "6.2.4",
+              "tzdata_version": "2026.6",
+              "requested_version": "6.2.4",
+              "actual_version": "6.2.4",
+              "interpreter": "<lab>/tzdata-2026.6/bin/python",
+              "runtime": {
+                "implementation": "CPython",
+                "version": "3.13.18"
+              },
+              "timezone": {
+                "provider": "tzdata",
+                "source": "tzdata.zoneinfo",
+                "tzdata_version": "2026.6",
+                "requested_tzdata_version": "2026.6",
+                "tzif_sha256": "d2ba5f8960acb66655c19dfd94de72a07f51cb8ef55f843b801409d460432578",
+                "key": "America/Havana",
+                "zoneinfo_tzpath": []
+              }
+            }
+          }
+        },
+        "window": {
+          "start": "2026-11-02T00:00:00.000000Z",
+          "end": "2026-11-04T00:00:00.000000Z",
+          "bounds": "[start, end)",
+          "timezone": "America/Havana"
+        },
+        "completeness": {
+          "window_checked": true,
+          "left": {
+            "complete": true,
+            "accepted": true,
+            "count": 2,
+            "observed_count": 2,
+            "termination_reason": "complete",
+            "diagnostics": {
+              "detail": "next occurrence is at or beyond exclusive end",
+              "stderr": "",
+              "returncode": 0
+            }
+          },
+          "right": {
+            "complete": true,
+            "accepted": true,
+            "count": 2,
+            "observed_count": 2,
+            "termination_reason": "complete",
+            "diagnostics": {
+              "detail": "next occurrence is at or beyond exclusive end",
+              "stderr": "",
+              "returncode": 0
+            }
+          }
+        },
+        "limits": {
+          "deadline_seconds": 10.0,
+          "max_occurrences": 10000,
+          "stdout_bytes": 8388608,
+          "stderr_bytes": 65536,
+          "context": 2
+        },
+        "termination_reason": {
+          "left": "complete",
+          "right": "complete"
+        },
+        "occurrence_counts": {
+          "left": 2,
+          "right": 2
+        },
+        "empty_window": false,
+        "first_divergence": {
+          "kind": "occurrence",
+          "index": 0,
+          "left": {
+            "local": "2026-11-02T09:00:00.000000-05:00",
+            "utc": "2026-11-02T14:00:00.000000Z",
+            "offset_seconds": -18000,
+            "fold": 0,
+            "roundtrip_local": "2026-11-02T09:00:00.000000-05:00",
+            "roundtrip_fold": 0,
+            "nonexistent_local": false
+          },
+          "right": {
+            "local": "2026-11-02T09:00:00.000000-04:00",
+            "utc": "2026-11-02T13:00:00.000000Z",
+            "offset_seconds": -14400,
+            "fold": 0,
+            "roundtrip_local": "2026-11-02T09:00:00.000000-04:00",
+            "roundtrip_fold": 0,
+            "nonexistent_local": false
+          }
+        },
+        "context": {
+          "left": [
+            {
+              "index": 0,
+              "local": "2026-11-02T09:00:00.000000-05:00",
+              "utc": "2026-11-02T14:00:00.000000Z",
+              "offset_seconds": -18000,
+              "fold": 0,
+              "roundtrip_local": "2026-11-02T09:00:00.000000-05:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 1,
+              "local": "2026-11-03T09:00:00.000000-05:00",
+              "utc": "2026-11-03T14:00:00.000000Z",
+              "offset_seconds": -18000,
+              "fold": 0,
+              "roundtrip_local": "2026-11-03T09:00:00.000000-05:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            }
+          ],
+          "right": [
+            {
+              "index": 0,
+              "local": "2026-11-02T09:00:00.000000-04:00",
+              "utc": "2026-11-02T13:00:00.000000Z",
+              "offset_seconds": -14400,
+              "fold": 0,
+              "roundtrip_local": "2026-11-02T09:00:00.000000-04:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 1,
+              "local": "2026-11-03T09:00:00.000000-04:00",
+              "utc": "2026-11-03T13:00:00.000000Z",
+              "offset_seconds": -14400,
+              "fold": 0,
+              "roundtrip_local": "2026-11-03T09:00:00.000000-04:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            }
+          ]
+        },
+        "timezone_provenance": {
+          "left": {
+            "provider": "tzdata",
+            "source": "tzdata.zoneinfo",
+            "tzdata_version": "2026.5",
+            "requested_tzdata_version": "2026.5",
+            "tzif_sha256": "9ace6b0aeab6c81338f55993ca632d15037773968137596477c8e3cca767366f",
+            "key": "America/Havana",
+            "zoneinfo_tzpath": []
+          },
+          "right": {
+            "provider": "tzdata",
+            "source": "tzdata.zoneinfo",
+            "tzdata_version": "2026.6",
+            "requested_tzdata_version": "2026.6",
+            "tzif_sha256": "d2ba5f8960acb66655c19dfd94de72a07f51cb8ef55f843b801409d460432578",
+            "key": "America/Havana",
+            "zoneinfo_tzpath": []
+          }
+        },
+        "timezone_data": {
+          "different_tzdata_allowed": true,
+          "status": "different",
+          "versions_equal": false,
+          "tzif_equal": false
+        },
+        "profile_differences": {
+          "configuration": [],
+          "provenance": [
+            "tzdata_version",
+            "tzif_sha256"
+          ],
+          "timezone_data_only": true
+        },
+        "adapter_diagnostics": {
+          "left": {
+            "detail": "next occurrence is at or beyond exclusive end",
+            "stderr": "",
+            "returncode": 0
+          },
+          "right": {
+            "detail": "next occurrence is at or beyond exclusive end",
+            "stderr": "",
+            "returncode": 0
+          }
+        }
+      },
+      {
+        "schema_version": 2,
+        "name": "tzdata_berlin_control",
+        "outcome": "MATCH_WITHIN_WINDOW",
+        "reason": "equal UTC occurrence streams in the fully checked window",
+        "profiles": {
+          "left": {
+            "requested": {
+              "engine": "croniter",
+              "expression": "0 9 * * *",
+              "options": {
+                "day_or": true,
+                "max_years_between_matches": 50
+              },
+              "python": "<lab>/tzdata-2026.5/bin/python",
+              "version": "6.2.4",
+              "tzdata_version": "2026.5"
+            },
+            "resolved": {
+              "engine": "croniter",
+              "expression": "0 9 * * *",
+              "options": {
+                "day_or": true,
+                "max_years_between_matches": 50
+              },
+              "python": "<lab>/tzdata-2026.5/bin/python",
+              "version": "6.2.4",
+              "tzdata_version": "2026.5",
+              "requested_version": "6.2.4",
+              "actual_version": "6.2.4",
+              "interpreter": "<lab>/tzdata-2026.5/bin/python",
+              "runtime": {
+                "implementation": "CPython",
+                "version": "3.13.18"
+              },
+              "timezone": {
+                "provider": "tzdata",
+                "source": "tzdata.zoneinfo",
+                "tzdata_version": "2026.5",
+                "requested_tzdata_version": "2026.5",
+                "tzif_sha256": "a7fd9932d785d4d690900b834c3563c1810c1cf2e01711bcc0926af6c0767cb7",
+                "key": "Europe/Berlin",
+                "zoneinfo_tzpath": []
+              }
+            }
+          },
+          "right": {
+            "requested": {
+              "engine": "croniter",
+              "expression": "0 9 * * *",
+              "options": {
+                "day_or": true,
+                "max_years_between_matches": 50
+              },
+              "python": "<lab>/tzdata-2026.6/bin/python",
+              "version": "6.2.4",
+              "tzdata_version": "2026.6"
+            },
+            "resolved": {
+              "engine": "croniter",
+              "expression": "0 9 * * *",
+              "options": {
+                "day_or": true,
+                "max_years_between_matches": 50
+              },
+              "python": "<lab>/tzdata-2026.6/bin/python",
+              "version": "6.2.4",
+              "tzdata_version": "2026.6",
+              "requested_version": "6.2.4",
+              "actual_version": "6.2.4",
+              "interpreter": "<lab>/tzdata-2026.6/bin/python",
+              "runtime": {
+                "implementation": "CPython",
+                "version": "3.13.18"
+              },
+              "timezone": {
+                "provider": "tzdata",
+                "source": "tzdata.zoneinfo",
+                "tzdata_version": "2026.6",
+                "requested_tzdata_version": "2026.6",
+                "tzif_sha256": "a7fd9932d785d4d690900b834c3563c1810c1cf2e01711bcc0926af6c0767cb7",
+                "key": "Europe/Berlin",
+                "zoneinfo_tzpath": []
+              }
+            }
+          }
+        },
+        "window": {
+          "start": "2026-11-02T00:00:00.000000Z",
+          "end": "2026-11-04T00:00:00.000000Z",
+          "bounds": "[start, end)",
+          "timezone": "Europe/Berlin"
+        },
+        "completeness": {
+          "window_checked": true,
+          "left": {
+            "complete": true,
+            "accepted": true,
+            "count": 2,
+            "observed_count": 2,
+            "termination_reason": "complete",
+            "diagnostics": {
+              "detail": "next occurrence is at or beyond exclusive end",
+              "stderr": "",
+              "returncode": 0
+            }
+          },
+          "right": {
+            "complete": true,
+            "accepted": true,
+            "count": 2,
+            "observed_count": 2,
+            "termination_reason": "complete",
+            "diagnostics": {
+              "detail": "next occurrence is at or beyond exclusive end",
+              "stderr": "",
+              "returncode": 0
+            }
+          }
+        },
+        "limits": {
+          "deadline_seconds": 10.0,
+          "max_occurrences": 10000,
+          "stdout_bytes": 8388608,
+          "stderr_bytes": 65536,
+          "context": 2
+        },
+        "termination_reason": {
+          "left": "complete",
+          "right": "complete"
+        },
+        "occurrence_counts": {
+          "left": 2,
+          "right": 2
+        },
+        "empty_window": false,
+        "first_divergence": null,
+        "context": {
+          "left": [
+            {
+              "index": 0,
+              "local": "2026-11-02T09:00:00.000000+01:00",
+              "utc": "2026-11-02T08:00:00.000000Z",
+              "offset_seconds": 3600,
+              "fold": 0,
+              "roundtrip_local": "2026-11-02T09:00:00.000000+01:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 1,
+              "local": "2026-11-03T09:00:00.000000+01:00",
+              "utc": "2026-11-03T08:00:00.000000Z",
+              "offset_seconds": 3600,
+              "fold": 0,
+              "roundtrip_local": "2026-11-03T09:00:00.000000+01:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            }
+          ],
+          "right": [
+            {
+              "index": 0,
+              "local": "2026-11-02T09:00:00.000000+01:00",
+              "utc": "2026-11-02T08:00:00.000000Z",
+              "offset_seconds": 3600,
+              "fold": 0,
+              "roundtrip_local": "2026-11-02T09:00:00.000000+01:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 1,
+              "local": "2026-11-03T09:00:00.000000+01:00",
+              "utc": "2026-11-03T08:00:00.000000Z",
+              "offset_seconds": 3600,
+              "fold": 0,
+              "roundtrip_local": "2026-11-03T09:00:00.000000+01:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            }
+          ]
+        },
+        "timezone_provenance": {
+          "left": {
+            "provider": "tzdata",
+            "source": "tzdata.zoneinfo",
+            "tzdata_version": "2026.5",
+            "requested_tzdata_version": "2026.5",
+            "tzif_sha256": "a7fd9932d785d4d690900b834c3563c1810c1cf2e01711bcc0926af6c0767cb7",
+            "key": "Europe/Berlin",
+            "zoneinfo_tzpath": []
+          },
+          "right": {
+            "provider": "tzdata",
+            "source": "tzdata.zoneinfo",
+            "tzdata_version": "2026.6",
+            "requested_tzdata_version": "2026.6",
+            "tzif_sha256": "a7fd9932d785d4d690900b834c3563c1810c1cf2e01711bcc0926af6c0767cb7",
+            "key": "Europe/Berlin",
+            "zoneinfo_tzpath": []
+          }
+        },
+        "timezone_data": {
+          "different_tzdata_allowed": true,
+          "status": "different",
+          "versions_equal": false,
+          "tzif_equal": true
+        },
+        "profile_differences": {
+          "configuration": [],
+          "provenance": [
+            "tzdata_version"
+          ],
+          "timezone_data_only": true
+        },
+        "adapter_diagnostics": {
+          "left": {
+            "detail": "next occurrence is at or beyond exclusive end",
+            "stderr": "",
+            "returncode": 0
+          },
+          "right": {
+            "detail": "next occurrence is at or beyond exclusive end",
+            "stderr": "",
+            "returncode": 0
+          }
+        }
+      },
+      {
+        "schema_version": 2,
+        "name": "tzdata_utc_control",
+        "outcome": "MATCH_WITHIN_WINDOW",
+        "reason": "equal UTC occurrence streams in the fully checked window",
+        "profiles": {
+          "left": {
+            "requested": {
+              "engine": "croniter",
+              "expression": "0 9 * * *",
+              "options": {
+                "day_or": true,
+                "max_years_between_matches": 50
+              },
+              "python": "<lab>/tzdata-2026.5/bin/python",
+              "version": "6.2.4",
+              "tzdata_version": "2026.5"
+            },
+            "resolved": {
+              "engine": "croniter",
+              "expression": "0 9 * * *",
+              "options": {
+                "day_or": true,
+                "max_years_between_matches": 50
+              },
+              "python": "<lab>/tzdata-2026.5/bin/python",
+              "version": "6.2.4",
+              "tzdata_version": "2026.5",
+              "requested_version": "6.2.4",
+              "actual_version": "6.2.4",
+              "interpreter": "<lab>/tzdata-2026.5/bin/python",
+              "runtime": {
+                "implementation": "CPython",
+                "version": "3.13.18"
+              },
+              "timezone": {
+                "provider": "tzdata",
+                "source": "tzdata.zoneinfo",
+                "tzdata_version": "2026.5",
+                "requested_tzdata_version": "2026.5",
+                "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+                "key": "UTC",
+                "zoneinfo_tzpath": []
+              }
+            }
+          },
+          "right": {
+            "requested": {
+              "engine": "croniter",
+              "expression": "0 9 * * *",
+              "options": {
+                "day_or": true,
+                "max_years_between_matches": 50
+              },
+              "python": "<lab>/tzdata-2026.6/bin/python",
+              "version": "6.2.4",
+              "tzdata_version": "2026.6"
+            },
+            "resolved": {
+              "engine": "croniter",
+              "expression": "0 9 * * *",
+              "options": {
+                "day_or": true,
+                "max_years_between_matches": 50
+              },
+              "python": "<lab>/tzdata-2026.6/bin/python",
+              "version": "6.2.4",
+              "tzdata_version": "2026.6",
+              "requested_version": "6.2.4",
+              "actual_version": "6.2.4",
+              "interpreter": "<lab>/tzdata-2026.6/bin/python",
+              "runtime": {
+                "implementation": "CPython",
+                "version": "3.13.18"
+              },
+              "timezone": {
+                "provider": "tzdata",
+                "source": "tzdata.zoneinfo",
+                "tzdata_version": "2026.6",
+                "requested_tzdata_version": "2026.6",
+                "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+                "key": "UTC",
+                "zoneinfo_tzpath": []
+              }
+            }
+          }
+        },
+        "window": {
+          "start": "2026-11-02T00:00:00.000000Z",
+          "end": "2026-11-04T00:00:00.000000Z",
+          "bounds": "[start, end)",
+          "timezone": "UTC"
+        },
+        "completeness": {
+          "window_checked": true,
+          "left": {
+            "complete": true,
+            "accepted": true,
+            "count": 2,
+            "observed_count": 2,
+            "termination_reason": "complete",
+            "diagnostics": {
+              "detail": "next occurrence is at or beyond exclusive end",
+              "stderr": "",
+              "returncode": 0
+            }
+          },
+          "right": {
+            "complete": true,
+            "accepted": true,
+            "count": 2,
+            "observed_count": 2,
+            "termination_reason": "complete",
+            "diagnostics": {
+              "detail": "next occurrence is at or beyond exclusive end",
+              "stderr": "",
+              "returncode": 0
+            }
+          }
+        },
+        "limits": {
+          "deadline_seconds": 10.0,
+          "max_occurrences": 10000,
+          "stdout_bytes": 8388608,
+          "stderr_bytes": 65536,
+          "context": 2
+        },
+        "termination_reason": {
+          "left": "complete",
+          "right": "complete"
+        },
+        "occurrence_counts": {
+          "left": 2,
+          "right": 2
+        },
+        "empty_window": false,
+        "first_divergence": null,
+        "context": {
+          "left": [
+            {
+              "index": 0,
+              "local": "2026-11-02T09:00:00.000000+00:00",
+              "utc": "2026-11-02T09:00:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-11-02T09:00:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 1,
+              "local": "2026-11-03T09:00:00.000000+00:00",
+              "utc": "2026-11-03T09:00:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-11-03T09:00:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            }
+          ],
+          "right": [
+            {
+              "index": 0,
+              "local": "2026-11-02T09:00:00.000000+00:00",
+              "utc": "2026-11-02T09:00:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-11-02T09:00:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 1,
+              "local": "2026-11-03T09:00:00.000000+00:00",
+              "utc": "2026-11-03T09:00:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-11-03T09:00:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            }
+          ]
+        },
+        "timezone_provenance": {
+          "left": {
+            "provider": "tzdata",
+            "source": "tzdata.zoneinfo",
+            "tzdata_version": "2026.5",
+            "requested_tzdata_version": "2026.5",
+            "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+            "key": "UTC",
+            "zoneinfo_tzpath": []
+          },
+          "right": {
+            "provider": "tzdata",
+            "source": "tzdata.zoneinfo",
+            "tzdata_version": "2026.6",
+            "requested_tzdata_version": "2026.6",
+            "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+            "key": "UTC",
+            "zoneinfo_tzpath": []
+          }
+        },
+        "timezone_data": {
+          "different_tzdata_allowed": true,
+          "status": "different",
+          "versions_equal": false,
+          "tzif_equal": true
+        },
+        "profile_differences": {
+          "configuration": [],
+          "provenance": [
+            "tzdata_version"
+          ],
+          "timezone_data_only": true
+        },
+        "adapter_diagnostics": {
+          "left": {
+            "detail": "next occurrence is at or beyond exclusive end",
+            "stderr": "",
+            "returncode": 0
+          },
+          "right": {
+            "detail": "next occurrence is at or beyond exclusive end",
+            "stderr": "",
+            "returncode": 0
+          }
+        }
+      }
+    ]
+  }
+}

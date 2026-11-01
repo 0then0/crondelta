@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "tzdata_havana_rules",
+      "left": {
+        "engine": "croniter",
+        "expression": "0 9 * * *",
+        "version": "6.2.4",
+        "tzdata_version": "2026.5"
+      },
+      "right": {
+        "engine": "croniter",
+        "expression": "0 9 * * *",
+        "version": "6.2.4",
+        "tzdata_version": "2026.6"
+      },
+      "timezone": "America/Havana",
+      "start": "2026-11-02T00:00:00Z",
+      "end": "2026-11-04T00:00:00Z",
+      "allow_different_tzdata": true
+    },
+    {
+      "name": "tzdata_berlin_control",
+      "left": {
+        "engine": "croniter",
+        "expression": "0 9 * * *",
+        "version": "6.2.4",
+        "tzdata_version": "2026.5"
+      },
+      "right": {
+        "engine": "croniter",
+        "expression": "0 9 * * *",
+        "version": "6.2.4",
+        "tzdata_version": "2026.6"
+      },
+      "timezone": "Europe/Berlin",
+      "start": "2026-11-02T00:00:00Z",
+      "end": "2026-11-04T00:00:00Z",
+      "allow_different_tzdata": true
+    },
+    {
+      "name": "tzdata_utc_control",
+      "left": {
+        "engine": "croniter",
+        "expression": "0 9 * * *",
+        "version": "6.2.4",
+        "tzdata_version": "2026.5"
+      },
+      "right": {
+        "engine": "croniter",
+        "expression": "0 9 * * *",
+        "version": "6.2.4",
+        "tzdata_version": "2026.6"
+      },
+      "timezone": "UTC",
+      "start": "2026-11-02T00:00:00Z",
+      "end": "2026-11-04T00:00:00Z",
+      "allow_different_tzdata": true
+    }
+  ]
+}

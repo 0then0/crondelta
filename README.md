@@ -12,7 +12,8 @@
 Changing a cron library, its version, or its options can change when a schedule
 fires. CronDelta calls two installed Python engines and compares their UTC
 occurrences in a finite window. It reports the first proven difference, the
-versions and timezone data used, and whether the window was fully checked.
+versions and timezone data used, and whether the window was fully checked. It can
+also show which UTC occurrences change when only the timezone database changes.
 
 ## Quick start
 
@@ -21,7 +22,7 @@ from PyPI. If the release is not yet available there, use the source installatio
 below.
 
 ```sh
-uv tool install crondelta==0.1.0
+uv tool install crondelta==0.2.0
 crondelta compare \
   --left-engine croniter --left-version 6.2.4 \
   --right-engine apscheduler --right-version 3.11.3 \
@@ -55,7 +56,7 @@ the repository. To build and install from source instead:
 git clone https://github.com/0then0/crondelta.git
 cd crondelta
 uv build
-uv tool install ./dist/crondelta-0.1.0-py3-none-any.whl
+uv tool install ./dist/crondelta-0.2.0-py3-none-any.whl
 crondelta --version
 ```
 
@@ -75,10 +76,13 @@ executes jobs, or connects to a database.
   tzdata installed; it does not need a separate CronDelta installation.
 - **Expressions:** five fields: minute, hour, day-of-month, month, day-of-week.
   Six/seven fields, aliases, random/hash fields, and APScheduler 4.x are outside
-  v0.1 scope. Each engine parses its own expression.
+  the supported scope. Each engine parses its own expression.
 - **Timezones:** an explicit IANA key, with both engines forced to use the
-  tzdata wheel. Reports record its version and the timezone file's SHA-256.
-  Comparing different timezone databases is outside v0.1 scope.
+  tzdata wheel. Reports record the requested and resolved tzdata version and the
+  SHA-256 of the exact TZif file used. Sides with different timezone data are
+  `UNRESOLVED` unless the comparison is explicitly allowed with
+  `--allow-different-tzdata`; see the
+  [tzdata upgrade case](https://github.com/0then0/crondelta/blob/main/docs/tzdata-upgrade.md).
 - **Evidence:** exact UTC datetimes, original local time, offset, fold, and UTC
   round-trip. Deadlines and output/occurrence limits bound enumeration. An
   incomplete calculation cannot produce `MATCH_WITHIN_WINDOW`.
@@ -97,6 +101,9 @@ convert expressions or repair migrations automatically.
   sources, controlled differences, and reproduction commands.
 - [Croniter upgrade case](https://github.com/0then0/crondelta/blob/main/docs/croniter-upgrade.md): croniter 6.0.0 to 6.2.4
   across Zurich's repeated DST hour, with a UTC control.
+- [Timezone data upgrade case](https://github.com/0then0/crondelta/blob/main/docs/tzdata-upgrade.md): the same croniter
+  6.2.4 and expression under tzdata 2026.5 and 2026.6 in Havana, with Berlin and UTC
+  controls and an independent TZif check.
 - [Testing and support](https://github.com/0then0/crondelta/blob/main/docs/validation.md): verification commands, CI matrix,
   and tested behavior.
 - [Example manifests](https://github.com/0then0/crondelta/tree/main/examples/) and [representative JSON reports](https://github.com/0then0/crondelta/tree/main/examples/reports/).

@@ -9,29 +9,33 @@
   <title id="title">CronDelta</title>
   <desc
     id="description"
-  >A clock containing two schedule timelines. Their first occurrences align; the last occurrence differs.</desc>
+  >A clock face holding two schedule timelines. Their first two occurrences align; the third one on the lower timeline is shifted.</desc>
   <style>
     .ink { stroke: #334155; }
     .event { fill: #334155; }
-    .delta { fill: #0f766e; }
+    .delta { fill: #0d9488; }
+    .shift { stroke: #0d9488; }
     @media (prefers-color-scheme: dark) {
       .ink { stroke: #cbd5e1; }
       .event { fill: #cbd5e1; }
       .delta { fill: #5eead4; }
+      .shift { stroke: #5eead4; }
     }
   </style>
-  <g class="ink" fill="none" stroke-width="2.5" stroke-linecap="round">
-    <circle cx="48" cy="48" r="38" />
-    <path d="M48 20v12h11M24 48h48M24 64h48" />
+  <g class="ink" fill="none" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="48" cy="48" r="40" />
+    <path d="M48 17v10" />
+  </g>
+  <g class="ink" fill="none" stroke-width="2.5" stroke-linecap="round" opacity=".45">
+    <path d="M24 44h48M24 62h48" />
   </g>
   <g class="event">
-    <circle cx="30" cy="48" r="3.5" />
-    <circle cx="46" cy="48" r="3.5" />
-    <circle cx="30" cy="64" r="3.5" />
-    <circle cx="46" cy="64" r="3.5" />
+    <circle cx="32" cy="44" r="4.5" />
+    <circle cx="48" cy="44" r="4.5" />
+    <circle cx="64" cy="44" r="4.5" />
+    <circle cx="32" cy="62" r="4.5" />
+    <circle cx="48" cy="62" r="4.5" />
   </g>
-  <g class="delta">
-    <circle cx="62" cy="48" r="4" />
-    <circle cx="72" cy="64" r="4" />
-  </g>
+  <path class="shift" d="M64 50v12h3" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+  <circle class="delta" cx="72" cy="62" r="6" />
 </svg>

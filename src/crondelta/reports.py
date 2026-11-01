@@ -1,6 +1,44 @@
 """Human report rendering; JSON is the versioned report dictionary."""
 
 
+def tzdata_lines(report: dict) -> list[str]:
+    data, differences = report.get("timezone_data"), report.get("profile_differences")
+    if not data:
+        return []
+    allowed = "explicitly allowed" if data["different_tzdata_allowed"] else "not allowed"
+    status = data["status"]
+    if status == "different":
+        versions = "equal" if data["versions_equal"] else "different"
+        hashes = "equal" if data["tzif_equal"] else "different"
+        lines = [
+            f"Timezone data: different, comparison {allowed}; tzdata versions {versions}, "
+            f"TZif SHA-256 {hashes}"
+        ]
+    else:
+        lines = [f"Timezone data: {status}"]
+    configuration = differences["configuration"]
+    provenance = differences["provenance"]
+    if configuration or provenance:
+        lines.append(
+            "Differing factors: configuration "
+            + (", ".join(configuration) or "none")
+            + "; provenance "
+            + (", ".join(provenance) if provenance is not None else "unknown")
+        )
+    if status == "different":
+        if differences["timezone_data_only"]:
+            lines.append(
+                "Tracked factors other than timezone data (engine, engine version, expression, "
+                "options, runtime) are equal; other dependencies are not compared."
+            )
+        elif data["different_tzdata_allowed"]:
+            lines.append(
+                "Other tracked factors also differ or are unknown; occurrence differences "
+                "cannot be attributed to timezone data alone."
+            )
+    return lines
+
+
 def human(report: dict) -> str:
     if "cases" in report:
         return (
@@ -26,13 +64,18 @@ def human(report: dict) -> str:
         )
         if resolved:
             tz = resolved["timezone"]
+            requested_tz = tz.get("requested_tzdata_version") or "unpinned"
             lines.append(
-                f"  Python {resolved['runtime']['version']}; tzdata {tz['tzdata_version']}; "
-                f"TZif SHA-256 {tz['tzif_sha256']}"
+                f"  Python {resolved['runtime']['version']}; tzdata {tz['tzdata_version']} "
+                f"(requested: {requested_tz}); TZif SHA-256 {tz['tzif_sha256']}"
             )
         diagnostic = report["adapter_diagnostics"][side]
         if diagnostic["detail"]:
             lines.append(f"  {diagnostic['detail']}")
+    lines.append(
+        f"Window fully checked: {'yes' if report['completeness']['window_checked'] else 'no'}"
+    )
+    lines.extend(tzdata_lines(report))
     if report["empty_window"]:
         lines.append("Empty check: both fully enumerated streams contain zero occurrences.")
     witness = report["first_divergence"]
@@ -62,6 +105,8 @@ def human(report: dict) -> str:
                     f"fold={event['fold']} | round-trip={event['roundtrip_local']}"
                 )
     if report["outcome"] == "MATCH_WITHIN_WINDOW":
+        if report.get("timezone_data", {}) and report["timezone_data"]["status"] == "different":
+            lines.append("Equal UTC streams despite the different timezone data listed above.")
         lines.append(
             "This is evidence only for this complete finite window, not global equivalence."
         )

@@ -17,7 +17,7 @@ def record(kind, **values):
     return {"protocol_version": 1, "type": kind, **values}
 
 
-def header(case):
+def header(case, tzdata_version="2026.2", tzif_sha256="a" * 64, **timezone):
     return record(
         "profile",
         profile={
@@ -28,10 +28,13 @@ def header(case):
             "runtime": {"implementation": "CPython", "version": "3.13"},
             "timezone": {
                 "provider": "tzdata",
+                "source": "tzdata.zoneinfo",
                 "key": "UTC",
-                "tzdata_version": "2026.2",
-                "tzif_sha256": "a" * 64,
+                "tzdata_version": tzdata_version,
+                "requested_tzdata_version": case.left.tzdata_version,
+                "tzif_sha256": tzif_sha256,
                 "zoneinfo_tzpath": [],
+                **timezone,
             },
         },
     )

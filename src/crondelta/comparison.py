@@ -15,19 +15,78 @@ EXIT_CODES = {
 ERRORS = {"engine_error", "protocol_error", "missing_dependency", "non_advancing", "non_monotonic"}
 
 
-def compare_streams(left: Stream, right: Stream) -> tuple[str, dict | None, str]:
+ALLOW_HINT = "pass --allow-different-tzdata (manifest: allow_different_tzdata) to compare them"
+
+
+def tzdata_identity(stream: Stream) -> tuple[str, str] | None:
+    """The timezone data actually used: package version and TZif bytes, never the request."""
+    if not stream.profile:
+        return None
+    tz = stream.profile["timezone"]
+    return tz["tzdata_version"], tz["tzif_sha256"]
+
+
+def tzdata_differs(left: Stream, right: Stream) -> bool | None:
+    a, b = tzdata_identity(left), tzdata_identity(right)
+    return None if a is None or b is None else a != b
+
+
+def describe_tzdata_difference(left: Stream, right: Stream) -> str:
+    (lv, lh), (rv, rh) = tzdata_identity(left), tzdata_identity(right)
+    hashes = "equal" if lh == rh else "different"
+    return f"left tzdata {lv}, right tzdata {rv}; TZif SHA-256 {hashes}"
+
+
+def unresolved_detail(left: Stream, right: Stream) -> str:
+    notes = []
+    for side, stream in (("left", left), ("right", right)):
+        if stream.status == "version_mismatch":
+            notes.append(f"{side}: requested engine version is not installed")
+        elif stream.status == "tzdata_mismatch":
+            tz = stream.profile["timezone"]
+            notes.append(
+                f"{side}: requested tzdata {tz['requested_tzdata_version']}, "
+                f"installed {tz['tzdata_version']}"
+            )
+        elif stream.status == "unsupported":
+            notes.append(f"{side}: unsupported engine version")
+    return "requested engine profile cannot be resolved (" + "; ".join(notes) + ")"
+
+
+def compare_streams(
+    left: Stream, right: Stream, *, allow_different_tzdata: bool = False
+) -> tuple[str, dict | None, str]:
     if left.status in ERRORS or right.status in ERRORS:
         return "ENGINE_ERROR", None, "adapter failure or invalid occurrence stream"
-    if left.status == "invalid_timezone" or right.status == "invalid_timezone":
-        return "INVALID_INPUT", None, "timezone unavailable in the explicitly selected tzdata"
-    if left.status in {"version_mismatch", "unsupported"} or right.status in {
-        "version_mismatch",
-        "unsupported",
-    }:
-        return "UNRESOLVED", None, "requested engine profile cannot be resolved"
-    if left.profile and right.profile:
-        if left.profile["timezone"] != right.profile["timezone"]:
-            return "UNRESOLVED", None, "different timezone data is outside v0.1 scope"
+    missing = [
+        f"{side}: {stream.detail}"
+        for side, stream in (("left", left), ("right", right))
+        if stream.status == "invalid_timezone"
+    ]
+    if missing:
+        # One database lacking a zone that the other has is a tzdata comparison result that
+        # cannot be computed; no zone from the other side is substituted.
+        if len(missing) == 1 and allow_different_tzdata:
+            return (
+                "UNRESOLVED",
+                None,
+                "timezone unavailable in one explicitly selected tzdata (" + missing[0] + ")",
+            )
+        return (
+            "INVALID_INPUT",
+            None,
+            "timezone unavailable in the explicitly selected tzdata (" + "; ".join(missing) + ")",
+        )
+    unresolved = {"version_mismatch", "tzdata_mismatch", "unsupported"}
+    if left.status in unresolved or right.status in unresolved:
+        return "UNRESOLVED", None, unresolved_detail(left, right)
+    if tzdata_differs(left, right) and not allow_different_tzdata:
+        return (
+            "UNRESOLVED",
+            None,
+            f"different timezone data ({describe_tzdata_difference(left, right)}); {ALLOW_HINT}"
+            " explicitly",
+        )
     if left.status == right.status == "rejected":
         return "INVALID_INPUT", None, "both engines rejected their expressions"
     if (left.status == "rejected" and right.accepted) or (
@@ -69,8 +128,57 @@ def compare_streams(left: Stream, right: Stream) -> tuple[str, dict | None, str]
     return "UNRESOLVED", None, "no proven difference; at least one window was not fully checked"
 
 
+CONFIGURATION_FACTORS = ("engine", "expression", "options")
+TZDATA_FACTORS = {"tzdata_version", "tzif_sha256"}
+
+
+def timezone_data(case: Case, left: Stream, right: Stream) -> dict:
+    differs = tzdata_differs(left, right)
+    identity = [tzdata_identity(stream) for stream in (left, right)]
+    known = all(identity)
+    return {
+        "different_tzdata_allowed": case.allow_different_tzdata,
+        "status": "unresolved" if differs is None else "different" if differs else "identical",
+        "versions_equal": identity[0][0] == identity[1][0] if known else None,
+        "tzif_equal": identity[0][1] == identity[1][1] if known else None,
+    }
+
+
+def profile_differences(case: Case, left: Stream, right: Stream) -> dict:
+    """Name differing profile factors; interpreter paths and pins are not schedule factors."""
+    configuration = [
+        name
+        for name in CONFIGURATION_FACTORS
+        if getattr(case.left, name) != getattr(case.right, name)
+    ]
+    provenance = None
+    if left.profile and right.profile:
+        a, b = left.profile, right.profile
+        provenance = []
+        if a["actual_version"] != b["actual_version"]:
+            provenance.append("engine_version")
+        if a["runtime"] != b["runtime"]:
+            provenance.append("runtime")
+        for name in ("tzdata_version", "tzif_sha256"):
+            if a["timezone"][name] != b["timezone"][name]:
+                provenance.append(name)
+    if configuration:
+        timezone_data_only = False
+    elif provenance is None:
+        timezone_data_only = None
+    else:
+        timezone_data_only = bool(provenance) and set(provenance) <= TZDATA_FACTORS
+    return {
+        "configuration": configuration,
+        "provenance": provenance,
+        "timezone_data_only": timezone_data_only,
+    }
+
+
 def report(case: Case, left: Stream, right: Stream) -> dict:
-    outcome, witness, reason = compare_streams(left, right)
+    outcome, witness, reason = compare_streams(
+        left, right, allow_different_tzdata=case.allow_different_tzdata
+    )
     index = witness.get("index", 0) if witness else 0
     radius = case.limits.context
 
@@ -80,7 +188,8 @@ def report(case: Case, left: Stream, right: Stream) -> dict:
         return [{"index": i, **event} for i, event in enumerate(stream.events[low:high], low)]
 
     return {
-        "schema_version": 1,
+        # Version 2 reports can pair MATCH_WITHIN_WINDOW/DIFFERENT with different tz data.
+        "schema_version": 2 if case.allow_different_tzdata else 1,
         "name": case.name,
         "outcome": outcome,
         "reason": reason,
@@ -112,6 +221,8 @@ def report(case: Case, left: Stream, right: Stream) -> dict:
             "left": left.profile["timezone"] if left.profile else None,
             "right": right.profile["timezone"] if right.profile else None,
         },
+        "timezone_data": timezone_data(case, left, right),
+        "profile_differences": profile_differences(case, left, right),
         "adapter_diagnostics": {
             "left": left.summary()["diagnostics"],
             "right": right.summary()["diagnostics"],
@@ -138,5 +249,7 @@ def input_report(outcome: str, detail: str) -> dict:
         "first_divergence": None,
         "context": {"left": [], "right": []},
         "timezone_provenance": {"left": None, "right": None},
+        "timezone_data": None,
+        "profile_differences": None,
         "adapter_diagnostics": {},
     }

@@ -19,7 +19,9 @@ Hypothesis. It also installs the wheel into a disposable environment and tests
 the module and console command outside the checkout.
 
 An additional disposable environment contains historical engines for migration
-controls. Both temporary environments are removed when verification exits.
+controls, and two more contain the hash-pinned tzdata 2026.5 and 2026.6 lab
+([timezone data upgrade](tzdata-upgrade.md)). All temporary environments are removed
+when verification exits.
 Verification installs dependencies for development; `crondelta compare` itself
 does not install anything. No jobs or SQL queries are executed.
 
@@ -35,7 +37,11 @@ The installed-package test requires `CRONDELTA_INSTALLED_PYTHON`; a plain pytest
 run skips it when unset. Use `verify.sh` to prepare that interpreter and run the
 full suite. `CRONDELTA_HISTORICAL_PYTHON` selects the historical controls, and
 `CRONDELTA_SECOND_PYTHON` optionally selects a different prepared interpreter
-for the independent-interpreter test.
+for the independent-interpreter test. `CRONDELTA_TZDATA_OLD_PYTHON` and
+`CRONDELTA_TZDATA_NEW_PYTHON` select the lab interpreters; without them those
+tests are skipped. The tzdata unit tests use synthetic databases in temporary
+virtual environments, so they need no network and do not depend on the installed
+tzdata.
 
 ## Disposable Linux verification
 
@@ -78,6 +84,14 @@ The suite covers:
   [migration reproduction controls](query-exporter.md).
 - The [croniter upgrade case](croniter-upgrade.md): real 6.0.0/6.2.4 streams
   across Zurich's repeated hour, exact counts and fold evidence, and a UTC control.
+- The [tzdata upgrade lab](tzdata-upgrade.md): Havana `DIFFERENT` with the expected
+  witness, Berlin and UTC controls, and an independent stdlib TZif control, driven
+  through the public CLI.
+- Explicit different-tzdata comparison: strict default, equal and different TZif
+  bytes across package versions, requested/resolved tzdata checks, zones missing from
+  one database, incomplete windows, window boundaries, factor classification,
+  worker/transport provenance validation, and isolation from `PYTHONTZPATH`, `TZ`, and
+  the ZoneInfo cache.
 - Release tag/version matching and runtime/package version consistency.
 
 ## Support boundaries
@@ -87,7 +101,7 @@ certified; on Windows the coordinator terminates and reaps only the direct
 child. Python 3.12 is allowed by package metadata but is outside the CI matrix.
 
 Tests establish behavior for the listed versions and controlled windows. Other
-engine versions, different timezone database releases, scheduler execution
+engine versions, timezone database releases other than the pinned lab pair, scheduler execution
 policies, and full query-exporter application behavior are not covered by those
 results. Consult the [enumeration contract](protocol.md#enumeration-contract)
 when investigating a difference near DST or an incomplete search.

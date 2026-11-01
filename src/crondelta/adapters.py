@@ -3,6 +3,7 @@
 import json
 import os
 import queue
+import re
 import signal
 import subprocess
 import threading
@@ -19,6 +20,7 @@ STATUSES = {
     "search_limit",
     "occurrence_cap",
     "version_mismatch",
+    "tzdata_mismatch",
     "unsupported",
     "engine_error",
     "non_advancing",
@@ -57,6 +59,18 @@ class Stream:
         }
 
 
+def requested_mismatch(profile: dict, requested: Profile) -> str | None:
+    """Terminal status that a worker must report when it cannot honor the requested pins."""
+    if requested.version is not None and profile["actual_version"] != requested.version:
+        return "version_mismatch"
+    if (
+        requested.tzdata_version is not None
+        and profile["timezone"]["tzdata_version"] != requested.tzdata_version
+    ):
+        return "tzdata_mismatch"
+    return None
+
+
 def consume(stream: Stream, message: dict, case: Case, requested: Profile) -> None:
     if (
         not isinstance(message, dict)
@@ -73,7 +87,7 @@ def consume(stream: Stream, message: dict, case: Case, requested: Profile) -> No
         profile = message.get("profile")
         if not isinstance(profile, dict):
             raise ValueError("invalid resolved profile")
-        for key in ("engine", "expression", "options", "python", "version"):
+        for key in ("engine", "expression", "options", "python", "version", "tzdata_version"):
             if profile.get(key) != getattr(requested, key):
                 raise ValueError(f"profile changed requested {key}")
         for key in ("actual_version", "interpreter"):
@@ -88,17 +102,22 @@ def consume(stream: Stream, message: dict, case: Case, requested: Profile) -> No
         if (
             not isinstance(tz, dict)
             or tz.get("provider") != "tzdata"
+            or tz.get("source") != "tzdata.zoneinfo"
             or tz.get("key") != case.timezone
             or tz.get("zoneinfo_tzpath") != []
             or not isinstance(tz.get("tzdata_version"), str)
+            or not tz["tzdata_version"]
+            or tz.get("requested_tzdata_version") != requested.tzdata_version
             or not isinstance(tz.get("tzif_sha256"), str)
-            or len(tz["tzif_sha256"]) != 64
+            or not re.fullmatch(r"[0-9a-f]{64}", tz["tzif_sha256"])
         ):
             raise ValueError("invalid timezone provenance")
         stream.profile = profile
     elif kind == "accepted":
         if stream.profile is None or stream.accepted:
             raise ValueError("invalid/duplicate acceptance record")
+        if requested_mismatch(stream.profile, requested):
+            raise ValueError("worker proceeded despite unmet requested engine/tzdata version")
         stream.accepted = True
     elif kind == "occurrence":
         if stream.profile is None:
@@ -152,9 +171,11 @@ def consume(stream: Stream, message: dict, case: Case, requested: Profile) -> No
             raise ValueError("parser rejection after occurrences")
         if status == "complete" and not stream.accepted:
             raise ValueError("completion before parser acceptance")
-        if stream.profile and requested.version is not None:
-            mismatch = stream.profile["actual_version"] != requested.version
-            if mismatch != (status == "version_mismatch"):
+        if stream.profile:
+            expected = requested_mismatch(stream.profile, requested)
+            if (expected or status in {"version_mismatch", "tzdata_mismatch"}) and (
+                status != expected
+            ):
                 raise ValueError("inconsistent requested/actual version status")
         if not isinstance(message.get("detail", ""), str):
             raise ValueError("invalid diagnostic")

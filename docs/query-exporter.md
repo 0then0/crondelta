@@ -40,7 +40,7 @@ actual deployments may have installed different versions.
 
 The reproduction suite uses two version pairs:
 
-- Primary v0.1 baseline: croniter **6.2.4**, APScheduler **3.11.3**.
+- Primary baseline: croniter **6.2.4**, APScheduler **3.11.3**.
 - Historical pinned control: croniter **6.0.0**, APScheduler **3.11.2**.
 
 Both use tzdata **2026.2**, explicit UTC, and fixed windows. The historical

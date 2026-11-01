@@ -68,10 +68,12 @@ A baseline change requires reviewing the pinned tests, historical environment,
 examples, and documentation together.
 
 Use prepared interpreters and the existing adapters. Both sides must use the
-same timezone provenance. Generate representative reports through the CLI or
+same timezone provenance, unless the case is a deliberate comparison of timezone
+database versions (`--allow-different-tzdata`), which pins each side's tzdata version. Generate representative reports through the CLI or
 reproduction helper; never edit reported occurrences or runtime provenance to
 match an expectation. Explain the chosen window, completeness, and limits.
-See the [croniter upgrade example](docs/croniter-upgrade.md) for a complete case.
+See the [croniter upgrade example](docs/croniter-upgrade.md) and the
+[tzdata upgrade lab](docs/tzdata-upgrade.md) for complete cases.
 
 Do not run production jobs or SQL to demonstrate trigger calculations. Remove
 secrets and private data from reports submitted publicly. Interpreter paths can
