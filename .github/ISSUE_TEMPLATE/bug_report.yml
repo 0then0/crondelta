@@ -40,7 +40,7 @@ body:
     id: environment
     attributes:
       label: Environment
-      description: Include CronDelta and Python versions, OS, both actual engine versions, and tzdata/provenance from the report.
+      description: Include CronDelta and Python versions, OS, both actual engine versions, and tzdata/provenance from the report. For cron-parser, include the Node.js, ICU, and Luxon versions.
       placeholder: |
         CronDelta:
         Python / OS:

@@ -5,6 +5,29 @@ are not part of a published package.
 
 ## [Unreleased]
 
+### Added
+
+- Comparison of two explicitly selected `cron-parser` 5.x installations with one shared
+  Node.js executable: `--left-engine cron-parser`, `--left-installation`, `--right-installation`,
+  `--node` (manifest profile `installation` and case `node`). The worker is a small adapter
+  over the public `CronExpressionParser.parse(...).next()` API, resolves the library and Luxon
+  only from the selected installation, keeps the inclusive `start` and exclusive `end`
+  semantics, and distinguishes rejection, missing dependency, version mismatch, search limit,
+  engine exceptions, and a proven end of the window.
+- Report `schema_version` 3 for Node.js comparisons, recording the loaded cron-parser and Luxon
+  versions and the Node.js, ICU, and timezone data versions. It explicitly marks the tzdata
+  package version and TZif hash as unavailable; versions 1 and 2 and Python reports are unchanged.
+- A reproducible cron-parser 5.8.1 to 5.9.0 case for Antarctica/Troll's two-hour DST gap
+  (npm lockfiles, `scripts/cron_parser_lab.py`, UTC, ordinary, and one-hour-gap controls, a
+  direct public API check, representative report, and `docs/cron-parser-upgrade.md`).
+
+### Changed
+
+- Python 3.10 to 3.15 are supported and tested (`requires-python >=3.10`). CI runs all six
+  versions with Node.js 24, and `scripts/verify_linux.sh` defaults to all six.
+- `scripts/verify.sh` prepares the cron-parser lab when `node` and `npm` are available;
+  `CRONDELTA_REQUIRE_NODE=1` makes them mandatory.
+
 ## [0.2.0] - 2026-11-02
 
 ### Added

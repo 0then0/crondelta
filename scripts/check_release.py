@@ -2,13 +2,27 @@
 
 import argparse
 import ast
-import tomllib
+import re
 from pathlib import Path
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10 has no TOML parser; read the one needed key.
+    tomllib = None
+
+
+def project_version(text: str) -> str:
+    if tomllib is not None:
+        return tomllib.loads(text)["project"]["version"]
+    table = re.search(r"^\[project\]\s*$(.*?)(?=^\[|\Z)", text, re.MULTILINE | re.DOTALL)
+    match = re.search(r'^version\s*=\s*"([^"]+)"', table.group(1) if table else "", re.MULTILINE)
+    if match is None:
+        raise ValueError("pyproject.toml has no [project] version")
+    return match.group(1)
 
 
 def check_release(root: Path, tag: str | None = None) -> str:
-    project = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))["project"]
-    version = project["version"]
+    version = project_version((root / "pyproject.toml").read_text(encoding="utf-8"))
     module = ast.parse((root / "src/crondelta/__init__.py").read_text(encoding="utf-8"))
     runtime_version = next(
         (

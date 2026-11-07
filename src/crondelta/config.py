@@ -3,9 +3,11 @@
 import math
 import re
 import sys
-from dataclasses import asdict, dataclass, field
-from datetime import UTC, datetime
+from dataclasses import asdict, dataclass, field, replace
+from datetime import datetime, timezone
 from typing import Any
+
+UTC = timezone.utc  # datetime.UTC exists only on Python 3.11+
 
 
 class InvalidInput(ValueError):
@@ -21,8 +23,12 @@ def utc_datetime(value: str) -> datetime:
         r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,6})?(?:Z|\+00:00)", value
     ):
         raise InvalidInput("timestamps must be UTC ISO 8601 with seconds and at most 6 decimals")
+    # Python 3.10 parses only 3 or 6 fractional digits; normalize to 6 after validation.
+    text = re.sub(
+        r"\.(\d{1,6})(?=Z|\+00:00$)", lambda m: "." + m.group(1).ljust(6, "0"), value
+    ).replace("Z", "+00:00")
     try:
-        return datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(UTC)
+        return datetime.fromisoformat(text).astimezone(UTC)
     except ValueError as exc:
         raise InvalidInput(f"invalid timestamp: {value}") from exc
 
@@ -37,6 +43,11 @@ def keys(data: dict, allowed: set[str], label: str) -> None:
         raise InvalidInput(f"unknown {label} keys: {', '.join(sorted(unknown))}")
 
 
+PYTHON_ENGINES = ("croniter", "apscheduler")
+NODE_ENGINE = "cron-parser"
+ENGINES = (*PYTHON_ENGINES, NODE_ENGINE)
+
+
 @dataclass(frozen=True)
 class Profile:
     engine: str
@@ -45,6 +56,33 @@ class Profile:
     python: str = sys.executable
     version: str | None = None
     tzdata_version: str | None = None
+    # Node.js profiles only. `node` is the case-level executable shared by both sides.
+    installation: str | None = None
+    node: str | None = None
+
+    @property
+    def is_node(self) -> bool:
+        return self.engine == NODE_ENGINE
+
+    def to_dict(self) -> dict:
+        """The requested profile as protocol and report data.
+
+        Python profiles keep exactly their pre-Node fields, so existing reports and the
+        worker protocol are unchanged.
+        """
+        if self.is_node:
+            return {
+                "engine": self.engine,
+                "expression": self.expression,
+                "options": self.options,
+                "installation": self.installation,
+                "node": self.node,
+                "version": self.version,
+            }
+        return {
+            key: getattr(self, key)
+            for key in ("engine", "expression", "options", "python", "version", "tzdata_version")
+        }
 
     @classmethod
     def parse(cls, data: dict) -> "Profile":
@@ -52,14 +90,24 @@ class Profile:
             raise InvalidInput("profile must be an object")
         keys(
             data,
-            {"engine", "expression", "options", "python", "version", "tzdata_version"},
+            {
+                "engine",
+                "expression",
+                "options",
+                "python",
+                "version",
+                "tzdata_version",
+                "installation",
+            },
             "profile",
         )
         engine = data.get("engine")
         if not isinstance(engine, str) or not engine:
             raise InvalidInput("profile engine must be a nonempty string")
-        if engine not in ("croniter", "apscheduler"):
-            raise UnsupportedScope("supported engines: croniter, apscheduler (3.x)")
+        if engine not in ENGINES:
+            raise UnsupportedScope(
+                "supported engines: croniter, apscheduler (3.x), cron-parser (5.x)"
+            )
         expression = data.get("expression")
         if not isinstance(expression, str) or len(expression) > 1024:
             raise InvalidInput("expression must be a string of at most 1024 characters")
@@ -71,6 +119,10 @@ class Profile:
         options = data.get("options", {})
         if not isinstance(options, dict):
             raise InvalidInput("options must be an object")
+        if engine == NODE_ENGINE:
+            return cls._parse_node(data, expression, options)
+        if data.get("installation") is not None:
+            raise InvalidInput("installation applies only to cron-parser profiles")
         allowed = {"day_or", "max_years_between_matches"} if engine == "croniter" else set()
         if options.keys() - allowed:
             raise UnsupportedScope(
@@ -100,6 +152,24 @@ class Profile:
         ):
             raise InvalidInput("tzdata_version must be a nonempty string")
         return cls(engine, expression, resolved_options, python, version, tzdata_version)
+
+    @classmethod
+    def _parse_node(cls, data: dict, expression: str, options: dict) -> "Profile":
+        for key in ("python", "tzdata_version"):
+            if key in data:
+                raise InvalidInput(f"{key} does not apply to cron-parser profiles")
+        if options:
+            raise UnsupportedScope(f"unsupported {NODE_ENGINE} options: {sorted(options)}")
+        installation, version = data.get("installation"), data.get("version")
+        if not isinstance(installation, str) or not installation or len(installation) > 4096:
+            raise InvalidInput(
+                "cron-parser profiles require installation: the directory containing node_modules"
+            )
+        if not isinstance(version, str) or not version or len(version) > 128:
+            raise InvalidInput("cron-parser profiles require the exact expected version")
+        return cls(
+            NODE_ENGINE, expression, {}, python="", version=version, installation=installation
+        )
 
 
 @dataclass(frozen=True)
@@ -145,6 +215,7 @@ class Case:
     end: datetime
     limits: Limits
     allow_different_tzdata: bool = False
+    node: str | None = None
 
     @classmethod
     def parse(cls, data: dict) -> "Case":
@@ -161,6 +232,7 @@ class Case:
                 "end",
                 "limits",
                 "allow_different_tzdata",
+                "node",
             },
             "case",
         )
@@ -184,21 +256,36 @@ class Case:
         # Avoid boundary overflows in public engine APIs.
         if start.year < 2 or end.year > 9998:
             raise UnsupportedScope("v0.1 supports windows within years 0002..9998")
+        left, right = Profile.parse(data.get("left")), Profile.parse(data.get("right"))
+        node = data.get("node")
+        if left.is_node or right.is_node:
+            if not (left.is_node and right.is_node):
+                raise UnsupportedScope(
+                    "cron-parser can only be compared with cron-parser in this version"
+                )
+            if allow_different_tzdata:
+                raise InvalidInput("allow_different_tzdata does not apply to cron-parser")
+            if not isinstance(node, str) or not node or len(node) > 4096:
+                raise InvalidInput("cron-parser cases require node: the Node.js executable")
+            left, right = replace(left, node=node), replace(right, node=node)
+        elif node is not None:
+            raise InvalidInput("node applies only to cron-parser cases")
         return cls(
             name,
-            Profile.parse(data.get("left")),
-            Profile.parse(data.get("right")),
+            left,
+            right,
             timezone,
             start,
             end,
             Limits.parse(data.get("limits", {})),
             allow_different_tzdata,
+            node,
         )
 
     def request(self, profile: Profile) -> dict:
         return {
             "protocol_version": 1,
-            "profile": asdict(profile),
+            "profile": profile.to_dict(),
             "timezone": self.timezone,
             "start": iso(self.start),
             "end": iso(self.end),

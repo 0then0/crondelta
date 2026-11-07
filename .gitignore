@@ -51,3 +51,6 @@ htmlcov/
 ._*
 Thumbs.db
 Desktop.ini
+
+# Node.js packages installed for validation
+node_modules/

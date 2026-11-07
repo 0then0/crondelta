@@ -20,7 +20,8 @@ DAYS = ("2026-11-02", "2026-11-03")
 # Independent of croniter and CronDelta: stdlib only, reading the TZif bytes of each wheel.
 CONTROL = r"""
 import hashlib, importlib.metadata, importlib.resources, io, json, sys
-from datetime import UTC, datetime
+from datetime import datetime
+from datetime import timezone as dt_timezone
 from zoneinfo import ZoneInfo
 
 result = {"tzdata_version": importlib.metadata.version("tzdata"), "zones": {}}
@@ -31,7 +32,7 @@ for key in sys.argv[2:]:
     for day in sys.argv[1].split(","):
         year, month, date = map(int, day.split("-"))
         local = datetime(year, month, date, 9, 0, tzinfo=zone)
-        utc = local.astimezone(UTC)
+        utc = local.astimezone(dt_timezone.utc)
         assert local.replace(fold=1).utcoffset() == local.utcoffset()  # not a repeated time
         assert utc.astimezone(zone).replace(tzinfo=None) == local.replace(tzinfo=None)  # exists
         rows.append({

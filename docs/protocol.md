@@ -7,11 +7,13 @@ them. For command-line inputs and exit codes, see the [CLI reference](usage.md).
 ## Report versions
 
 Reports have `schema_version` **1** unless the case sets `allow_different_tzdata`,
-in which case it is **2**. Version 1 guarantees that `MATCH_WITHIN_WINDOW` and
+in which case it is **2**, or compares `cron-parser` installations, in which case it is
+**3** ([Report v3](#report-v3-nodejs)). Version 1 guarantees that `MATCH_WITHIN_WINDOW` and
 `DIFFERENT` come from sides with identical timezone data (the same tzdata version
 and TZif bytes). Version 2 withdraws that guarantee, so a consumer that relies on it
-can reject reports with another version. Fields of both versions are otherwise
-identical. A manifest report has the highest `schema_version` of its cases.
+can reject reports with another version. Fields of versions 1 and 2 are otherwise
+identical. Version 3 never carries the guarantee, because a Node.js run has neither a tzdata
+package version nor TZif bytes. A manifest report has the highest `schema_version` of its cases.
 Manifest input stays at `schema_version: 1`; its new keys are optional.
 
 ## Report v1 and v2
@@ -52,6 +54,43 @@ has `schema_version` (see above), aggregated `outcome`, and an ordered `cases` a
 single-case reports. The reproduction helper saves a `schema_version`/`cases`
 collection without an aggregate verdict; it is an evidence collection, not CLI output.
 
+## Report v3 (Node.js)
+
+A case whose profiles use `cron-parser` produces `schema_version` **3**. Python profiles and
+their reports are unchanged, and a Python stream is still rejected unless it carries the
+tzdata provenance above. Version 3 keeps the envelope and field names of versions 1 and 2,
+with these differences:
+
+- `profiles.*.requested` contains `engine`, `expression`, `options` (always empty),
+  `installation`, `node`, and `version`. `python` and `tzdata_version` do not exist.
+  `profiles.*.resolved` adds `installation_realpath`, `loaded` (`cron-parser` and `luxon`,
+  each with the version read from the package that was loaded and the real path of the
+  loaded entry file, always inside `installation_realpath`), and `runtime`: `implementation`
+  (`Node.js`), `version`, the full `process.versions` map as `versions`, `platform`, `arch`,
+  `executable`, `executable_realpath`, and `icu_environment` (names, never values, of
+  `NODE_ICU_DATA`, `ICU_TIMEZONE_FILES_DIR`, and `TZ` when set).
+- `timezone_provenance.*` has `provider` (`node-intl`), `source`, `key`, `resolved_key` (the
+  canonical key reported by `Intl`), `luxon_zone_name`, `luxon_zone_type`, and the
+  `icu_version`, `tz_data_version` (`process.versions.tz`), `cldr_version`, and
+  `unicode_version` that the runtime reports, or null. `tzdata_package_version` and
+  `tzif_sha256` are always null, and `unavailable` lists every value that is null, so a
+  missing item is explicit rather than inferred. No tzdata wheel and no TZif file are
+  claimed for Node.js.
+- `timezone_data`: `different_tzdata_allowed` is always false; `status` is `same_runtime`,
+  `different`, or `unresolved`; `versions_equal` and `tzif_equal` are null; `runtime_equal`
+  is true only when both sides report the same executable real path, `process.versions`,
+  platform, architecture, and ICU environment. Different runtimes are `UNRESOLVED` and
+  there is no permission flag.
+- `profile_differences`: `configuration` lists differing `engine`, `expression`,
+  `options`; `provenance` lists `engine_version`, `runtime`, and `luxon_version`
+  (null if a side is unresolved); `engine_version_only` is true only when `configuration`
+  is empty and `engine_version` is the only entry in `provenance`. It describes tracked
+  factors only and does not name a cause; other dependencies are not compared.
+  `timezone_data_only` does not exist in version 3. Installation paths are not factors.
+
+Because the zone rules come from the runtime's ICU data, equal streams show equality for
+that runtime only. Consumers that rely on the version 1 guarantee must reject version 3.
+
 ## Enumeration contract
 
 Only exact aware UTC datetime equality is used in comparison. Input ISO formats
@@ -83,8 +122,13 @@ UTC instants are stream errors and are never sorted or deduplicated.
 
 The coordinator runs `[profile.python, "-I", absolute_worker_path]` with pipes
 and a deadline. The standalone worker is shipped in the wheel. Each target
-interpreter needs Python 3.11+, the selected library, its dependencies, and tzdata; it does not
+interpreter needs Python 3.10+, the selected library, its dependencies, and tzdata; it does not
 need CronDelta installed in that environment.
+
+A `cron-parser` profile runs `[node, absolute_node_worker_path]` instead, with `NODE_OPTIONS`
+and `NODE_PATH` removed from the environment (see [Node.js worker](#nodejs-worker)). The records
+and the coordinator's validation are the same, except for the profile and timezone provenance
+described in [Report v3](#report-v3-nodejs).
 
 Stdin is one JSON object: `protocol_version: 1`, `profile`, `timezone`, `start`,
 `end`, `max_occurrences`. The profile may pin `tzdata_version`. The worker reads at most 64 KiB. The coordinator's
@@ -143,3 +187,38 @@ limit protocol buffering. Evidence contexts contain at most `2 * context + 1`
 events per side. Full internal streams have at most `max_occurrences` events.
 The deadline applies to each adapter, including startup and waiting for exit;
 two adapters run sequentially, so a case can take roughly twice that deadline.
+
+## Node.js worker
+
+`src/crondelta/_node_worker.cjs` is shipped in the wheel and is a thin wrapper over
+cron-parser 5.x's public API (`CronExpressionParser.parse` and `next()`). It does not parse or
+repair schedules and needs only a Node.js that the selected installation supports (cron-parser 5.x
+declares 18+) and that installation.
+
+- **Location.** The package is read from `<installation>/node_modules/cron-parser`, and
+  Luxon from the folder Node would resolve for it (nested, then installation level). After
+  loading, the worker verifies that every loaded Luxon file lies under that Luxon, and that both
+  real paths are inside the installation. Anything else ends with `missing_dependency`
+  before any occurrence.
+- **Resolution order.** `missing_dependency` and `invalid_timezone` can occur before the
+  `profile` record; `version_mismatch` and `unsupported` (not cron-parser 5.x) follow it.
+- **Timezone.** The key must be accepted by `Intl.DateTimeFormat` and by Luxon and must not
+  resolve to an offset zone. `system`, `local`, and offsets such as `+0300` are
+  `invalid_timezone`.
+- **Start and end.** `currentDate` is exclusive for `next()`, so the worker seeds it at the whole
+  UTC minute before `start`, then discards results before the exact `start`
+  (microsecond precision) and stops at the first result at or beyond `end`. An occurrence
+  at `start` is included; one at `end` is not. After `max_occurrences`, one more `next()` call
+  decides between `complete` and `occurrence_cap`.
+- **Errors.** A plain `Error` from `parse()` is `rejected`; other error types are
+  `engine_error`. The library's loop-limit error is `search_limit` (an unresolved search);
+  every other exception from `next()`, including cron-parser's time span error and invalid
+  dates, is `engine_error`. A repeated or decreasing instant is `non_advancing` or
+  `non_monotonic`, and nothing is sorted or deduplicated.
+- **Evidence.** `local` is the engine result's own wall clock and offset (`CronDate` getters);
+  `utc` is `toDate()`. The worker verifies that they agree and otherwise ends with
+  `engine_error`. `roundtrip_local` is Luxon's rendering of the UTC instant in the zone, and
+  `nonexistent_local` is true if the two wall clocks differ. JavaScript has no `fold`: the flag
+  is derived from the instant and the zone offsets only, and is 1 when the same wall-clock
+  reading occurred earlier (within the preceding 36 hours) with a larger offset. A repeated
+  hour therefore keeps two distinct UTC instants whose `offset_seconds` and `fold` differ.

@@ -6,7 +6,8 @@ is covered by the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Development setup
 
-Use Python 3.11+ and [uv](https://docs.astral.sh/uv/):
+Use Python 3.10 to 3.15 and [uv](https://docs.astral.sh/uv/). Changes that touch
+the cron-parser comparison also need Node.js and npm (see [Testing and support](docs/validation.md)):
 
 ```sh
 git clone https://github.com/0then0/crondelta.git
@@ -23,7 +24,8 @@ scope before implementing them.
 ## Making a change
 
 - Keep each pull request focused on one problem and explain the resulting behavior.
-- Use Python 3.11-compatible code. Ruff defines Python formatting and lint rules;
+- Use Python 3.10-compatible code (no `datetime.UTC`, `tomllib`, or other 3.11+ APIs
+  in the package, worker, or scripts). Ruff defines Python formatting and lint rules;
   `.editorconfig` defines whitespace conventions for other files.
 - Add tests for meaningful behavior changes and credible regressions. A
   documentation-only change does not need an application test.

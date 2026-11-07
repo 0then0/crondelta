@@ -14,6 +14,9 @@ from pathlib import Path
 
 from .config import Case, Profile, utc_datetime
 
+PYTHON_WORKER = Path(__file__).with_name("_worker.py")
+NODE_WORKER = Path(__file__).with_name("_node_worker.cjs")
+
 STATUSES = {
     "complete",
     "rejected",
@@ -71,6 +74,66 @@ def requested_mismatch(profile: dict, requested: Profile) -> str | None:
     return None
 
 
+def nonempty_str(value) -> bool:
+    return isinstance(value, str) and bool(value)
+
+
+def validate_node_provenance(profile: dict, case: Case) -> None:
+    """Node.js runs have ICU timezone data: no tzdata package version and no TZif bytes."""
+    runtime = profile["runtime"]
+    versions = runtime.get("versions")
+    if (
+        not isinstance(versions, dict)
+        or not all(nonempty_str(k) and isinstance(v, str) for k, v in versions.items())
+        or versions.get("node") != runtime["version"]
+        or not all(nonempty_str(runtime.get(k)) for k in ("platform", "arch", "executable"))
+        or not nonempty_str(runtime.get("executable_realpath"))
+        or not isinstance(runtime.get("icu_environment"), list)
+        or not all(nonempty_str(name) for name in runtime["icu_environment"])
+    ):
+        raise ValueError("invalid Node.js runtime provenance")
+    root = profile.get("installation_realpath")
+    loaded = profile.get("loaded")
+    if (
+        not nonempty_str(root)
+        or not isinstance(loaded, dict)
+        or loaded.keys()
+        != {
+            "cron-parser",
+            "luxon",
+        }
+    ):
+        raise ValueError("invalid loaded module provenance")
+    for module in loaded.values():
+        if (
+            not isinstance(module, dict)
+            or not nonempty_str(module.get("version"))
+            or not nonempty_str(module.get("path"))
+            or not module["path"].startswith(root + os.sep)
+        ):
+            raise ValueError("module was not loaded from the selected installation")
+    if loaded["cron-parser"]["version"] != profile["actual_version"]:
+        raise ValueError("loaded cron-parser version differs from the reported version")
+    tz = profile.get("timezone")
+    optional = ("icu_version", "tz_data_version", "cldr_version", "unicode_version")
+    if (
+        not isinstance(tz, dict)
+        or tz.get("provider") != "node-intl"
+        or tz.get("key") != case.timezone
+        or not all(nonempty_str(tz.get(k)) for k in ("source", "resolved_key", "luxon_zone_name"))
+        or tz.get("luxon_zone_type") not in ("iana", "fixed")
+        or not all(tz.get(k) is None or nonempty_str(tz.get(k)) for k in optional)
+        or tz.get("tzdata_package_version") is not None
+        or tz.get("tzif_sha256") is not None
+    ):
+        raise ValueError("invalid timezone provenance")
+    expected_missing = {"tzdata_package_version", "tzif_sha256"} | {
+        k for k in optional if tz[k] is None
+    }
+    if not isinstance(tz.get("unavailable"), list) or set(tz["unavailable"]) != expected_missing:
+        raise ValueError("unavailable timezone provenance must be listed explicitly")
+
+
 def consume(stream: Stream, message: dict, case: Case, requested: Profile) -> None:
     if (
         not isinstance(message, dict)
@@ -87,8 +150,8 @@ def consume(stream: Stream, message: dict, case: Case, requested: Profile) -> No
         profile = message.get("profile")
         if not isinstance(profile, dict):
             raise ValueError("invalid resolved profile")
-        for key in ("engine", "expression", "options", "python", "version", "tzdata_version"):
-            if profile.get(key) != getattr(requested, key):
+        for key, expected in requested.to_dict().items():
+            if profile.get(key) != expected:
                 raise ValueError(f"profile changed requested {key}")
         for key in ("actual_version", "interpreter"):
             if not isinstance(profile.get(key), str) or not profile[key]:
@@ -99,7 +162,9 @@ def consume(stream: Stream, message: dict, case: Case, requested: Profile) -> No
         ):
             raise ValueError("invalid runtime provenance")
         tz = profile.get("timezone")
-        if (
+        if requested.is_node:
+            validate_node_provenance(profile, case)
+        elif (
             not isinstance(tz, dict)
             or tz.get("provider") != "tzdata"
             or tz.get("source") != "tzdata.zoneinfo"
@@ -188,7 +253,12 @@ def consume(stream: Stream, message: dict, case: Case, requested: Profile) -> No
 def run_adapter(case: Case, profile: Profile, *, command: list[str] | None = None) -> Stream:
     """The command override is for transport tests, never exposed as a CLI plugin API."""
     stream = Stream(status="running")
-    command = command or [profile.python, "-I", str(Path(__file__).with_name("_worker.py"))]
+    env = None
+    if command is None and profile.is_node:
+        command = [profile.node, str(NODE_WORKER)]
+        # Options and search paths must not change which library or ICU data is loaded.
+        env = {k: v for k, v in os.environ.items() if k not in ("NODE_OPTIONS", "NODE_PATH")}
+    command = command or [profile.python, "-I", str(PYTHON_WORKER)]
     started = time.monotonic()
     try:
         child = subprocess.Popen(
@@ -197,6 +267,7 @@ def run_adapter(case: Case, profile: Profile, *, command: list[str] | None = Non
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             bufsize=0,
+            env=env,
             start_new_session=os.name == "posix",
         )
     except (OSError, ValueError) as exc:

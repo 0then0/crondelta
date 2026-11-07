@@ -13,8 +13,10 @@ import json
 import platform
 import sys
 import traceback
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo, reset_tzpath
+
+UTC = timezone.utc  # datetime.UTC exists only on Python 3.11+
 
 
 def emit(kind, **fields):

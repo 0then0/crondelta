@@ -1,9 +1,10 @@
 """Compare ordered UTC prefixes without inferring unknown suffixes."""
 
+import json
 from dataclasses import asdict
 
 from .adapters import Stream, run_adapter
-from .config import Case, iso, utc_datetime
+from .config import NODE_ENGINE, Case, iso, utc_datetime
 
 EXIT_CODES = {
     "MATCH_WITHIN_WINDOW": 0,
@@ -18,10 +19,29 @@ ERRORS = {"engine_error", "protocol_error", "missing_dependency", "non_advancing
 ALLOW_HINT = "pass --allow-different-tzdata (manifest: allow_different_tzdata) to compare them"
 
 
-def tzdata_identity(stream: Stream) -> tuple[str, str] | None:
-    """The timezone data actually used: package version and TZif bytes, never the request."""
+def is_node(stream: Stream) -> bool:
+    return bool(stream.profile) and stream.profile["engine"] == NODE_ENGINE
+
+
+def runtime_identity(profile: dict) -> tuple:
+    """What determines a Node.js run's ICU timezone data: the executable and its versions."""
+    runtime = profile["runtime"]
+    return tuple(
+        json.dumps(runtime[key], sort_keys=True)
+        for key in ("executable_realpath", "versions", "platform", "arch", "icu_environment")
+    )
+
+
+def tzdata_identity(stream: Stream) -> tuple | None:
+    """The timezone data actually used, never the request.
+
+    Python: tzdata package version and TZif bytes. Node.js exposes neither; the identity is
+    the runtime (executable, ICU, and the timezone data version it reports).
+    """
     if not stream.profile:
         return None
+    if is_node(stream):
+        return runtime_identity(stream.profile)
     tz = stream.profile["timezone"]
     return tz["tzdata_version"], tz["tzif_sha256"]
 
@@ -29,6 +49,17 @@ def tzdata_identity(stream: Stream) -> tuple[str, str] | None:
 def tzdata_differs(left: Stream, right: Stream) -> bool | None:
     a, b = tzdata_identity(left), tzdata_identity(right)
     return None if a is None or b is None else a != b
+
+
+def describe_runtime_difference(left: Stream, right: Stream) -> str:
+    sides = []
+    for side, stream in (("left", left), ("right", right)):
+        runtime, tz = stream.profile["runtime"], stream.profile["timezone"]
+        sides.append(
+            f"{side} Node.js {runtime['version']} at {runtime['executable_realpath']}, "
+            f"ICU {tz['icu_version'] or 'unknown'}, tz data {tz['tz_data_version'] or 'unknown'}"
+        )
+    return "; ".join(sides)
 
 
 def describe_tzdata_difference(left: Stream, right: Stream) -> str:
@@ -80,6 +111,14 @@ def compare_streams(
     unresolved = {"version_mismatch", "tzdata_mismatch", "unsupported"}
     if left.status in unresolved or right.status in unresolved:
         return "UNRESOLVED", None, unresolved_detail(left, right)
+    if is_node(left) and tzdata_differs(left, right):
+        # Both sides must run in one Node.js runtime; there is no permission flag for this.
+        return (
+            "UNRESOLVED",
+            None,
+            f"different Node.js runtime ({describe_runtime_difference(left, right)}); "
+            "both sides must use the same executable",
+        )
     if tzdata_differs(left, right) and not allow_different_tzdata:
         return (
             "UNRESOLVED",
@@ -136,6 +175,19 @@ def timezone_data(case: Case, left: Stream, right: Stream) -> dict:
     differs = tzdata_differs(left, right)
     identity = [tzdata_identity(stream) for stream in (left, right)]
     known = all(identity)
+    if case.left.is_node:
+        # No tzdata package or TZif bytes exist for Node.js; only runtime equality is known.
+        return {
+            "different_tzdata_allowed": False,
+            "status": "unresolved"
+            if differs is None
+            else "different"
+            if differs
+            else "same_runtime",
+            "versions_equal": None,
+            "tzif_equal": None,
+            "runtime_equal": None if differs is None else not differs,
+        }
     return {
         "different_tzdata_allowed": case.allow_different_tzdata,
         "status": "unresolved" if differs is None else "different" if differs else "identical",
@@ -144,8 +196,40 @@ def timezone_data(case: Case, left: Stream, right: Stream) -> dict:
     }
 
 
+def node_profile_differences(case: Case, left: Stream, right: Stream) -> dict:
+    """Report v3: tracked factors of two installations in one Node.js runtime.
+
+    Installation paths are not factors. A difference of the Luxon that cron-parser loaded is
+    listed separately, because the result cannot then be attributed to cron-parser alone.
+    """
+    configuration = [
+        name
+        for name in CONFIGURATION_FACTORS
+        if getattr(case.left, name) != getattr(case.right, name)
+    ]
+    provenance = None
+    if left.profile and right.profile:
+        a, b = left.profile, right.profile
+        provenance = []
+        if a["actual_version"] != b["actual_version"]:
+            provenance.append("engine_version")
+        if runtime_identity(a) != runtime_identity(b):
+            provenance.append("runtime")
+        if a["loaded"]["luxon"]["version"] != b["loaded"]["luxon"]["version"]:
+            provenance.append("luxon_version")
+    return {
+        "configuration": configuration,
+        "provenance": provenance,
+        "engine_version_only": None
+        if provenance is None
+        else not configuration and provenance == ["engine_version"],
+    }
+
+
 def profile_differences(case: Case, left: Stream, right: Stream) -> dict:
     """Name differing profile factors; interpreter paths and pins are not schedule factors."""
+    if case.left.is_node:
+        return node_profile_differences(case, left, right)
     configuration = [
         name
         for name in CONFIGURATION_FACTORS
@@ -189,13 +273,14 @@ def report(case: Case, left: Stream, right: Stream) -> dict:
 
     return {
         # Version 2 reports can pair MATCH_WITHIN_WINDOW/DIFFERENT with different tz data.
-        "schema_version": 2 if case.allow_different_tzdata else 1,
+        # Version 3: Node.js runs, whose timezone data identity is the ICU runtime.
+        "schema_version": 3 if case.left.is_node else 2 if case.allow_different_tzdata else 1,
         "name": case.name,
         "outcome": outcome,
         "reason": reason,
         "profiles": {
-            "left": {"requested": asdict(case.left), "resolved": left.profile},
-            "right": {"requested": asdict(case.right), "resolved": right.profile},
+            "left": {"requested": case.left.to_dict(), "resolved": left.profile},
+            "right": {"requested": case.right.to_dict(), "resolved": right.profile},
         },
         "window": {
             "start": iso(case.start),

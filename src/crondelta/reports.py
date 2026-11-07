@@ -1,10 +1,36 @@
 """Human report rendering; JSON is the versioned report dictionary."""
 
 
+def node_lines(report: dict) -> list[str]:
+    data, differences = report["timezone_data"], report["profile_differences"]
+    lines = [f"Node.js runtime: {data['status'].replace('_', ' ')}"]
+    configuration, provenance = differences["configuration"], differences["provenance"]
+    if configuration or provenance:
+        lines.append(
+            "Differing factors: configuration "
+            + (", ".join(configuration) or "none")
+            + "; provenance "
+            + (", ".join(provenance) if provenance is not None else "unknown")
+        )
+    if differences["engine_version_only"]:
+        lines.append(
+            "Tracked factors other than the cron-parser version (expression, Node.js runtime, "
+            "Luxon) are equal; other dependencies are not compared."
+        )
+    elif provenance and "luxon_version" in provenance:
+        lines.append(
+            "Luxon differs between the installations; an occurrence difference cannot be "
+            "attributed to cron-parser alone."
+        )
+    return lines
+
+
 def tzdata_lines(report: dict) -> list[str]:
     data, differences = report.get("timezone_data"), report.get("profile_differences")
     if not data:
         return []
+    if report["schema_version"] == 3:
+        return node_lines(report)
     allowed = "explicitly allowed" if data["different_tzdata_allowed"] else "not allowed"
     status = data["status"]
     if status == "different":
@@ -62,7 +88,15 @@ def human(report: dict) -> str:
             f"{side}: {requested['engine']} {version}, {requested['expression']!r}, "
             f"occurrences={count}, {summary['termination_reason']}"
         )
-        if resolved:
+        if resolved and "loaded" in resolved:
+            tz = resolved["timezone"]
+            lines.append(
+                f"  Node.js {resolved['runtime']['version']}; "
+                f"ICU {tz['icu_version'] or 'unknown'}; "
+                f"tz data {tz['tz_data_version'] or 'unknown'}; "
+                f"Luxon {resolved['loaded']['luxon']['version']}; TZif SHA-256 unavailable"
+            )
+        elif resolved:
             tz = resolved["timezone"]
             requested_tz = tz.get("requested_tzdata_version") or "unpinned"
             lines.append(

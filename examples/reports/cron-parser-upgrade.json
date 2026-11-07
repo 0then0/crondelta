@@ -1,0 +1,1862 @@
+{
+  "schema_version": 1,
+  "lab": "cron-parser-5.8.1-to-5.9.0",
+  "redaction": "absolute paths of the lab, repository and Node.js replaced by labels",
+  "preparation": [
+    {
+      "cwd": "<lab>/cron-parser-5.8.1",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "lockfile": "examples/cron-parser-lab/5.8.1/package-lock.json"
+    },
+    {
+      "cwd": "<lab>/cron-parser-5.9.0",
+      "argv": [
+        "npm",
+        "ci",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund"
+      ],
+      "lockfile": "examples/cron-parser-lab/5.9.0/package-lock.json"
+    }
+  ],
+  "commands": [
+    {
+      "argv": [
+        "compare",
+        "--manifest",
+        "<lab>/manifest.json",
+        "--format",
+        "json"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1
+    },
+    {
+      "argv": [
+        "compare",
+        "--format",
+        "json",
+        "--node",
+        "<node>",
+        "--timezone",
+        "Antarctica/Troll",
+        "--start",
+        "2026-03-27T00:00:00Z",
+        "--end",
+        "2026-03-31T00:00:00Z",
+        "--expression",
+        "30 1 * * *",
+        "--left-engine",
+        "cron-parser",
+        "--left-installation",
+        "<lab>/cron-parser-5.8.1",
+        "--left-version",
+        "5.8.1",
+        "--right-engine",
+        "cron-parser",
+        "--right-installation",
+        "<lab>/cron-parser-5.9.0",
+        "--right-version",
+        "5.9.0"
+      ],
+      "exit_code": 1,
+      "expected_exit_code": 1
+    },
+    {
+      "argv": [
+        "compare",
+        "--format",
+        "json",
+        "--node",
+        "<node>",
+        "--timezone",
+        "Antarctica/Troll",
+        "--start",
+        "2026-03-23T00:00:00Z",
+        "--end",
+        "2026-03-27T00:00:00Z",
+        "--expression",
+        "30 1 * * *",
+        "--left-engine",
+        "cron-parser",
+        "--left-installation",
+        "<lab>/cron-parser-5.8.1",
+        "--left-version",
+        "5.8.1",
+        "--right-engine",
+        "cron-parser",
+        "--right-installation",
+        "<lab>/cron-parser-5.9.0",
+        "--right-version",
+        "5.9.0"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    },
+    {
+      "argv": [
+        "compare",
+        "--format",
+        "json",
+        "--node",
+        "<node>",
+        "--timezone",
+        "UTC",
+        "--start",
+        "2026-03-27T00:00:00Z",
+        "--end",
+        "2026-03-31T00:00:00Z",
+        "--expression",
+        "30 1 * * *",
+        "--left-engine",
+        "cron-parser",
+        "--left-installation",
+        "<lab>/cron-parser-5.8.1",
+        "--left-version",
+        "5.8.1",
+        "--right-engine",
+        "cron-parser",
+        "--right-installation",
+        "<lab>/cron-parser-5.9.0",
+        "--right-version",
+        "5.9.0"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    },
+    {
+      "argv": [
+        "compare",
+        "--format",
+        "json",
+        "--node",
+        "<node>",
+        "--timezone",
+        "America/New_York",
+        "--start",
+        "2026-03-07T00:00:00Z",
+        "--end",
+        "2026-03-11T00:00:00Z",
+        "--expression",
+        "30 2 * * *",
+        "--left-engine",
+        "cron-parser",
+        "--left-installation",
+        "<lab>/cron-parser-5.8.1",
+        "--left-version",
+        "5.8.1",
+        "--right-engine",
+        "cron-parser",
+        "--right-installation",
+        "<lab>/cron-parser-5.9.0",
+        "--right-version",
+        "5.9.0"
+      ],
+      "exit_code": 0,
+      "expected_exit_code": 0
+    }
+  ],
+  "independent_control": {
+    "cron_parser_troll_gap": {
+      "5.8.1": {
+        "version": "5.8.1",
+        "luxon": "3.7.2",
+        "occurrences": [
+          "2026-03-27T01:30:00.000Z",
+          "2026-03-28T01:30:00.000Z",
+          "2026-03-29T23:30:00.000Z",
+          "2026-03-30T23:30:00.000Z"
+        ]
+      },
+      "5.9.0": {
+        "version": "5.9.0",
+        "luxon": "3.7.2",
+        "occurrences": [
+          "2026-03-27T01:30:00.000Z",
+          "2026-03-28T01:30:00.000Z",
+          "2026-03-29T01:30:00.000Z",
+          "2026-03-29T23:30:00.000Z",
+          "2026-03-30T23:30:00.000Z"
+        ]
+      }
+    },
+    "cron_parser_troll_ordinary_control": {
+      "5.8.1": {
+        "version": "5.8.1",
+        "luxon": "3.7.2",
+        "occurrences": [
+          "2026-03-23T01:30:00.000Z",
+          "2026-03-24T01:30:00.000Z",
+          "2026-03-25T01:30:00.000Z",
+          "2026-03-26T01:30:00.000Z"
+        ]
+      },
+      "5.9.0": {
+        "version": "5.9.0",
+        "luxon": "3.7.2",
+        "occurrences": [
+          "2026-03-23T01:30:00.000Z",
+          "2026-03-24T01:30:00.000Z",
+          "2026-03-25T01:30:00.000Z",
+          "2026-03-26T01:30:00.000Z"
+        ]
+      }
+    },
+    "cron_parser_utc_control": {
+      "5.8.1": {
+        "version": "5.8.1",
+        "luxon": "3.7.2",
+        "occurrences": [
+          "2026-03-27T01:30:00.000Z",
+          "2026-03-28T01:30:00.000Z",
+          "2026-03-29T01:30:00.000Z",
+          "2026-03-30T01:30:00.000Z"
+        ]
+      },
+      "5.9.0": {
+        "version": "5.9.0",
+        "luxon": "3.7.2",
+        "occurrences": [
+          "2026-03-27T01:30:00.000Z",
+          "2026-03-28T01:30:00.000Z",
+          "2026-03-29T01:30:00.000Z",
+          "2026-03-30T01:30:00.000Z"
+        ]
+      }
+    },
+    "cron_parser_new_york_gap_control": {
+      "5.8.1": {
+        "version": "5.8.1",
+        "luxon": "3.7.2",
+        "occurrences": [
+          "2026-03-07T07:30:00.000Z",
+          "2026-03-08T07:30:00.000Z",
+          "2026-03-09T06:30:00.000Z",
+          "2026-03-10T06:30:00.000Z"
+        ]
+      },
+      "5.9.0": {
+        "version": "5.9.0",
+        "luxon": "3.7.2",
+        "occurrences": [
+          "2026-03-07T07:30:00.000Z",
+          "2026-03-08T07:30:00.000Z",
+          "2026-03-09T06:30:00.000Z",
+          "2026-03-10T06:30:00.000Z"
+        ]
+      }
+    }
+  },
+  "report": {
+    "schema_version": 3,
+    "outcome": "DIFFERENT",
+    "cases": [
+      {
+        "schema_version": 3,
+        "name": "cron_parser_troll_gap",
+        "outcome": "DIFFERENT",
+        "reason": "first unequal UTC occurrence in checked prefixes",
+        "profiles": {
+          "left": {
+            "requested": {
+              "engine": "cron-parser",
+              "expression": "30 1 * * *",
+              "options": {},
+              "installation": "<lab>/cron-parser-5.8.1",
+              "node": "<node>",
+              "version": "5.8.1"
+            },
+            "resolved": {
+              "engine": "cron-parser",
+              "expression": "30 1 * * *",
+              "options": {},
+              "installation": "<lab>/cron-parser-5.8.1",
+              "node": "<node>",
+              "version": "5.8.1",
+              "requested_version": "5.8.1",
+              "actual_version": "5.8.1",
+              "interpreter": "<node>",
+              "runtime": {
+                "implementation": "Node.js",
+                "version": "26.13.0",
+                "versions": {
+                  "node": "26.13.0",
+                  "acorn": "8.19.0",
+                  "ada": "4.0.0",
+                  "amaro": "1.1.11",
+                  "ares": "1.34.9",
+                  "brotli": "1.2.0",
+                  "cldr": "48.0",
+                  "icu": "78.3",
+                  "libffi": "3.8.0",
+                  "lief": "1.0.0",
+                  "llhttp": "9.4.3",
+                  "merve": "1.2.2",
+                  "modules": "147",
+                  "napi": "10",
+                  "nbytes": "0.1.4",
+                  "ncrypto": "0.0.1",
+                  "nghttp2": "1.70.0",
+                  "nghttp3": "",
+                  "ngtcp2": "",
+                  "openssl": "3.5.9",
+                  "simdjson": "5.0.3",
+                  "simdutf": "7.7.0",
+                  "sqlite": "3.54.0",
+                  "tz": "2026e",
+                  "undici": "8.12.2",
+                  "unicode": "17.0",
+                  "uv": "1.52.1",
+                  "uvwasi": "0.0.23",
+                  "v8": "14.6.202.34-node.40",
+                  "zlib": "1.3.2.1-motley-456ae73",
+                  "zstd": "1.5.7"
+                },
+                "platform": "darwin",
+                "arch": "arm64",
+                "executable": "<node>",
+                "executable_realpath": "<node>",
+                "icu_environment": []
+              },
+              "installation_realpath": "<lab>/cron-parser-5.8.1",
+              "loaded": {
+                "cron-parser": {
+                  "version": "5.8.1",
+                  "path": "<lab>/cron-parser-5.8.1/node_modules/cron-parser/dist/index.js"
+                },
+                "luxon": {
+                  "version": "3.7.2",
+                  "path": "<lab>/cron-parser-5.8.1/node_modules/luxon/build/node/luxon.js"
+                }
+              },
+              "timezone": {
+                "provider": "node-intl",
+                "source": "Intl.DateTimeFormat (ICU) through Luxon",
+                "key": "Antarctica/Troll",
+                "resolved_key": "Antarctica/Troll",
+                "luxon_zone_name": "Antarctica/Troll",
+                "luxon_zone_type": "iana",
+                "icu_version": "78.3",
+                "tz_data_version": "2026e",
+                "cldr_version": "48.0",
+                "unicode_version": "17.0",
+                "tzdata_package_version": null,
+                "tzif_sha256": null,
+                "unavailable": [
+                  "tzdata_package_version",
+                  "tzif_sha256"
+                ]
+              }
+            }
+          },
+          "right": {
+            "requested": {
+              "engine": "cron-parser",
+              "expression": "30 1 * * *",
+              "options": {},
+              "installation": "<lab>/cron-parser-5.9.0",
+              "node": "<node>",
+              "version": "5.9.0"
+            },
+            "resolved": {
+              "engine": "cron-parser",
+              "expression": "30 1 * * *",
+              "options": {},
+              "installation": "<lab>/cron-parser-5.9.0",
+              "node": "<node>",
+              "version": "5.9.0",
+              "requested_version": "5.9.0",
+              "actual_version": "5.9.0",
+              "interpreter": "<node>",
+              "runtime": {
+                "implementation": "Node.js",
+                "version": "26.13.0",
+                "versions": {
+                  "node": "26.13.0",
+                  "acorn": "8.19.0",
+                  "ada": "4.0.0",
+                  "amaro": "1.1.11",
+                  "ares": "1.34.9",
+                  "brotli": "1.2.0",
+                  "cldr": "48.0",
+                  "icu": "78.3",
+                  "libffi": "3.8.0",
+                  "lief": "1.0.0",
+                  "llhttp": "9.4.3",
+                  "merve": "1.2.2",
+                  "modules": "147",
+                  "napi": "10",
+                  "nbytes": "0.1.4",
+                  "ncrypto": "0.0.1",
+                  "nghttp2": "1.70.0",
+                  "nghttp3": "",
+                  "ngtcp2": "",
+                  "openssl": "3.5.9",
+                  "simdjson": "5.0.3",
+                  "simdutf": "7.7.0",
+                  "sqlite": "3.54.0",
+                  "tz": "2026e",
+                  "undici": "8.12.2",
+                  "unicode": "17.0",
+                  "uv": "1.52.1",
+                  "uvwasi": "0.0.23",
+                  "v8": "14.6.202.34-node.40",
+                  "zlib": "1.3.2.1-motley-456ae73",
+                  "zstd": "1.5.7"
+                },
+                "platform": "darwin",
+                "arch": "arm64",
+                "executable": "<node>",
+                "executable_realpath": "<node>",
+                "icu_environment": []
+              },
+              "installation_realpath": "<lab>/cron-parser-5.9.0",
+              "loaded": {
+                "cron-parser": {
+                  "version": "5.9.0",
+                  "path": "<lab>/cron-parser-5.9.0/node_modules/cron-parser/dist/index.js"
+                },
+                "luxon": {
+                  "version": "3.7.2",
+                  "path": "<lab>/cron-parser-5.9.0/node_modules/luxon/build/node/luxon.js"
+                }
+              },
+              "timezone": {
+                "provider": "node-intl",
+                "source": "Intl.DateTimeFormat (ICU) through Luxon",
+                "key": "Antarctica/Troll",
+                "resolved_key": "Antarctica/Troll",
+                "luxon_zone_name": "Antarctica/Troll",
+                "luxon_zone_type": "iana",
+                "icu_version": "78.3",
+                "tz_data_version": "2026e",
+                "cldr_version": "48.0",
+                "unicode_version": "17.0",
+                "tzdata_package_version": null,
+                "tzif_sha256": null,
+                "unavailable": [
+                  "tzdata_package_version",
+                  "tzif_sha256"
+                ]
+              }
+            }
+          }
+        },
+        "window": {
+          "start": "2026-03-27T00:00:00.000000Z",
+          "end": "2026-03-31T00:00:00.000000Z",
+          "bounds": "[start, end)",
+          "timezone": "Antarctica/Troll"
+        },
+        "completeness": {
+          "window_checked": true,
+          "left": {
+            "complete": true,
+            "accepted": true,
+            "count": 4,
+            "observed_count": 4,
+            "termination_reason": "complete",
+            "diagnostics": {
+              "detail": "next occurrence is at or beyond exclusive end",
+              "stderr": "",
+              "returncode": 0
+            }
+          },
+          "right": {
+            "complete": true,
+            "accepted": true,
+            "count": 5,
+            "observed_count": 5,
+            "termination_reason": "complete",
+            "diagnostics": {
+              "detail": "next occurrence is at or beyond exclusive end",
+              "stderr": "",
+              "returncode": 0
+            }
+          }
+        },
+        "limits": {
+          "deadline_seconds": 10.0,
+          "max_occurrences": 10000,
+          "stdout_bytes": 8388608,
+          "stderr_bytes": 65536,
+          "context": 10
+        },
+        "termination_reason": {
+          "left": "complete",
+          "right": "complete"
+        },
+        "occurrence_counts": {
+          "left": 4,
+          "right": 5
+        },
+        "empty_window": false,
+        "first_divergence": {
+          "kind": "occurrence",
+          "index": 2,
+          "left": {
+            "local": "2026-03-30T01:30:00.000000+02:00",
+            "utc": "2026-03-29T23:30:00.000000Z",
+            "offset_seconds": 7200,
+            "fold": 0,
+            "roundtrip_local": "2026-03-30T01:30:00.000000+02:00",
+            "roundtrip_fold": 0,
+            "nonexistent_local": false
+          },
+          "right": {
+            "local": "2026-03-29T03:30:00.000000+02:00",
+            "utc": "2026-03-29T01:30:00.000000Z",
+            "offset_seconds": 7200,
+            "fold": 0,
+            "roundtrip_local": "2026-03-29T03:30:00.000000+02:00",
+            "roundtrip_fold": 0,
+            "nonexistent_local": false
+          }
+        },
+        "context": {
+          "left": [
+            {
+              "index": 0,
+              "local": "2026-03-27T01:30:00.000000+00:00",
+              "utc": "2026-03-27T01:30:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-03-27T01:30:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 1,
+              "local": "2026-03-28T01:30:00.000000+00:00",
+              "utc": "2026-03-28T01:30:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-03-28T01:30:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 2,
+              "local": "2026-03-30T01:30:00.000000+02:00",
+              "utc": "2026-03-29T23:30:00.000000Z",
+              "offset_seconds": 7200,
+              "fold": 0,
+              "roundtrip_local": "2026-03-30T01:30:00.000000+02:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 3,
+              "local": "2026-03-31T01:30:00.000000+02:00",
+              "utc": "2026-03-30T23:30:00.000000Z",
+              "offset_seconds": 7200,
+              "fold": 0,
+              "roundtrip_local": "2026-03-31T01:30:00.000000+02:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            }
+          ],
+          "right": [
+            {
+              "index": 0,
+              "local": "2026-03-27T01:30:00.000000+00:00",
+              "utc": "2026-03-27T01:30:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-03-27T01:30:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 1,
+              "local": "2026-03-28T01:30:00.000000+00:00",
+              "utc": "2026-03-28T01:30:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-03-28T01:30:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 2,
+              "local": "2026-03-29T03:30:00.000000+02:00",
+              "utc": "2026-03-29T01:30:00.000000Z",
+              "offset_seconds": 7200,
+              "fold": 0,
+              "roundtrip_local": "2026-03-29T03:30:00.000000+02:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 3,
+              "local": "2026-03-30T01:30:00.000000+02:00",
+              "utc": "2026-03-29T23:30:00.000000Z",
+              "offset_seconds": 7200,
+              "fold": 0,
+              "roundtrip_local": "2026-03-30T01:30:00.000000+02:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 4,
+              "local": "2026-03-31T01:30:00.000000+02:00",
+              "utc": "2026-03-30T23:30:00.000000Z",
+              "offset_seconds": 7200,
+              "fold": 0,
+              "roundtrip_local": "2026-03-31T01:30:00.000000+02:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            }
+          ]
+        },
+        "timezone_provenance": {
+          "left": {
+            "provider": "node-intl",
+            "source": "Intl.DateTimeFormat (ICU) through Luxon",
+            "key": "Antarctica/Troll",
+            "resolved_key": "Antarctica/Troll",
+            "luxon_zone_name": "Antarctica/Troll",
+            "luxon_zone_type": "iana",
+            "icu_version": "78.3",
+            "tz_data_version": "2026e",
+            "cldr_version": "48.0",
+            "unicode_version": "17.0",
+            "tzdata_package_version": null,
+            "tzif_sha256": null,
+            "unavailable": [
+              "tzdata_package_version",
+              "tzif_sha256"
+            ]
+          },
+          "right": {
+            "provider": "node-intl",
+            "source": "Intl.DateTimeFormat (ICU) through Luxon",
+            "key": "Antarctica/Troll",
+            "resolved_key": "Antarctica/Troll",
+            "luxon_zone_name": "Antarctica/Troll",
+            "luxon_zone_type": "iana",
+            "icu_version": "78.3",
+            "tz_data_version": "2026e",
+            "cldr_version": "48.0",
+            "unicode_version": "17.0",
+            "tzdata_package_version": null,
+            "tzif_sha256": null,
+            "unavailable": [
+              "tzdata_package_version",
+              "tzif_sha256"
+            ]
+          }
+        },
+        "timezone_data": {
+          "different_tzdata_allowed": false,
+          "status": "same_runtime",
+          "versions_equal": null,
+          "tzif_equal": null,
+          "runtime_equal": true
+        },
+        "profile_differences": {
+          "configuration": [],
+          "provenance": [
+            "engine_version"
+          ],
+          "engine_version_only": true
+        },
+        "adapter_diagnostics": {
+          "left": {
+            "detail": "next occurrence is at or beyond exclusive end",
+            "stderr": "",
+            "returncode": 0
+          },
+          "right": {
+            "detail": "next occurrence is at or beyond exclusive end",
+            "stderr": "",
+            "returncode": 0
+          }
+        }
+      },
+      {
+        "schema_version": 3,
+        "name": "cron_parser_troll_ordinary_control",
+        "outcome": "MATCH_WITHIN_WINDOW",
+        "reason": "equal UTC occurrence streams in the fully checked window",
+        "profiles": {
+          "left": {
+            "requested": {
+              "engine": "cron-parser",
+              "expression": "30 1 * * *",
+              "options": {},
+              "installation": "<lab>/cron-parser-5.8.1",
+              "node": "<node>",
+              "version": "5.8.1"
+            },
+            "resolved": {
+              "engine": "cron-parser",
+              "expression": "30 1 * * *",
+              "options": {},
+              "installation": "<lab>/cron-parser-5.8.1",
+              "node": "<node>",
+              "version": "5.8.1",
+              "requested_version": "5.8.1",
+              "actual_version": "5.8.1",
+              "interpreter": "<node>",
+              "runtime": {
+                "implementation": "Node.js",
+                "version": "26.13.0",
+                "versions": {
+                  "node": "26.13.0",
+                  "acorn": "8.19.0",
+                  "ada": "4.0.0",
+                  "amaro": "1.1.11",
+                  "ares": "1.34.9",
+                  "brotli": "1.2.0",
+                  "cldr": "48.0",
+                  "icu": "78.3",
+                  "libffi": "3.8.0",
+                  "lief": "1.0.0",
+                  "llhttp": "9.4.3",
+                  "merve": "1.2.2",
+                  "modules": "147",
+                  "napi": "10",
+                  "nbytes": "0.1.4",
+                  "ncrypto": "0.0.1",
+                  "nghttp2": "1.70.0",
+                  "nghttp3": "",
+                  "ngtcp2": "",
+                  "openssl": "3.5.9",
+                  "simdjson": "5.0.3",
+                  "simdutf": "7.7.0",
+                  "sqlite": "3.54.0",
+                  "tz": "2026e",
+                  "undici": "8.12.2",
+                  "unicode": "17.0",
+                  "uv": "1.52.1",
+                  "uvwasi": "0.0.23",
+                  "v8": "14.6.202.34-node.40",
+                  "zlib": "1.3.2.1-motley-456ae73",
+                  "zstd": "1.5.7"
+                },
+                "platform": "darwin",
+                "arch": "arm64",
+                "executable": "<node>",
+                "executable_realpath": "<node>",
+                "icu_environment": []
+              },
+              "installation_realpath": "<lab>/cron-parser-5.8.1",
+              "loaded": {
+                "cron-parser": {
+                  "version": "5.8.1",
+                  "path": "<lab>/cron-parser-5.8.1/node_modules/cron-parser/dist/index.js"
+                },
+                "luxon": {
+                  "version": "3.7.2",
+                  "path": "<lab>/cron-parser-5.8.1/node_modules/luxon/build/node/luxon.js"
+                }
+              },
+              "timezone": {
+                "provider": "node-intl",
+                "source": "Intl.DateTimeFormat (ICU) through Luxon",
+                "key": "Antarctica/Troll",
+                "resolved_key": "Antarctica/Troll",
+                "luxon_zone_name": "Antarctica/Troll",
+                "luxon_zone_type": "iana",
+                "icu_version": "78.3",
+                "tz_data_version": "2026e",
+                "cldr_version": "48.0",
+                "unicode_version": "17.0",
+                "tzdata_package_version": null,
+                "tzif_sha256": null,
+                "unavailable": [
+                  "tzdata_package_version",
+                  "tzif_sha256"
+                ]
+              }
+            }
+          },
+          "right": {
+            "requested": {
+              "engine": "cron-parser",
+              "expression": "30 1 * * *",
+              "options": {},
+              "installation": "<lab>/cron-parser-5.9.0",
+              "node": "<node>",
+              "version": "5.9.0"
+            },
+            "resolved": {
+              "engine": "cron-parser",
+              "expression": "30 1 * * *",
+              "options": {},
+              "installation": "<lab>/cron-parser-5.9.0",
+              "node": "<node>",
+              "version": "5.9.0",
+              "requested_version": "5.9.0",
+              "actual_version": "5.9.0",
+              "interpreter": "<node>",
+              "runtime": {
+                "implementation": "Node.js",
+                "version": "26.13.0",
+                "versions": {
+                  "node": "26.13.0",
+                  "acorn": "8.19.0",
+                  "ada": "4.0.0",
+                  "amaro": "1.1.11",
+                  "ares": "1.34.9",
+                  "brotli": "1.2.0",
+                  "cldr": "48.0",
+                  "icu": "78.3",
+                  "libffi": "3.8.0",
+                  "lief": "1.0.0",
+                  "llhttp": "9.4.3",
+                  "merve": "1.2.2",
+                  "modules": "147",
+                  "napi": "10",
+                  "nbytes": "0.1.4",
+                  "ncrypto": "0.0.1",
+                  "nghttp2": "1.70.0",
+                  "nghttp3": "",
+                  "ngtcp2": "",
+                  "openssl": "3.5.9",
+                  "simdjson": "5.0.3",
+                  "simdutf": "7.7.0",
+                  "sqlite": "3.54.0",
+                  "tz": "2026e",
+                  "undici": "8.12.2",
+                  "unicode": "17.0",
+                  "uv": "1.52.1",
+                  "uvwasi": "0.0.23",
+                  "v8": "14.6.202.34-node.40",
+                  "zlib": "1.3.2.1-motley-456ae73",
+                  "zstd": "1.5.7"
+                },
+                "platform": "darwin",
+                "arch": "arm64",
+                "executable": "<node>",
+                "executable_realpath": "<node>",
+                "icu_environment": []
+              },
+              "installation_realpath": "<lab>/cron-parser-5.9.0",
+              "loaded": {
+                "cron-parser": {
+                  "version": "5.9.0",
+                  "path": "<lab>/cron-parser-5.9.0/node_modules/cron-parser/dist/index.js"
+                },
+                "luxon": {
+                  "version": "3.7.2",
+                  "path": "<lab>/cron-parser-5.9.0/node_modules/luxon/build/node/luxon.js"
+                }
+              },
+              "timezone": {
+                "provider": "node-intl",
+                "source": "Intl.DateTimeFormat (ICU) through Luxon",
+                "key": "Antarctica/Troll",
+                "resolved_key": "Antarctica/Troll",
+                "luxon_zone_name": "Antarctica/Troll",
+                "luxon_zone_type": "iana",
+                "icu_version": "78.3",
+                "tz_data_version": "2026e",
+                "cldr_version": "48.0",
+                "unicode_version": "17.0",
+                "tzdata_package_version": null,
+                "tzif_sha256": null,
+                "unavailable": [
+                  "tzdata_package_version",
+                  "tzif_sha256"
+                ]
+              }
+            }
+          }
+        },
+        "window": {
+          "start": "2026-03-23T00:00:00.000000Z",
+          "end": "2026-03-27T00:00:00.000000Z",
+          "bounds": "[start, end)",
+          "timezone": "Antarctica/Troll"
+        },
+        "completeness": {
+          "window_checked": true,
+          "left": {
+            "complete": true,
+            "accepted": true,
+            "count": 4,
+            "observed_count": 4,
+            "termination_reason": "complete",
+            "diagnostics": {
+              "detail": "next occurrence is at or beyond exclusive end",
+              "stderr": "",
+              "returncode": 0
+            }
+          },
+          "right": {
+            "complete": true,
+            "accepted": true,
+            "count": 4,
+            "observed_count": 4,
+            "termination_reason": "complete",
+            "diagnostics": {
+              "detail": "next occurrence is at or beyond exclusive end",
+              "stderr": "",
+              "returncode": 0
+            }
+          }
+        },
+        "limits": {
+          "deadline_seconds": 10.0,
+          "max_occurrences": 10000,
+          "stdout_bytes": 8388608,
+          "stderr_bytes": 65536,
+          "context": 10
+        },
+        "termination_reason": {
+          "left": "complete",
+          "right": "complete"
+        },
+        "occurrence_counts": {
+          "left": 4,
+          "right": 4
+        },
+        "empty_window": false,
+        "first_divergence": null,
+        "context": {
+          "left": [
+            {
+              "index": 0,
+              "local": "2026-03-23T01:30:00.000000+00:00",
+              "utc": "2026-03-23T01:30:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-03-23T01:30:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 1,
+              "local": "2026-03-24T01:30:00.000000+00:00",
+              "utc": "2026-03-24T01:30:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-03-24T01:30:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 2,
+              "local": "2026-03-25T01:30:00.000000+00:00",
+              "utc": "2026-03-25T01:30:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-03-25T01:30:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 3,
+              "local": "2026-03-26T01:30:00.000000+00:00",
+              "utc": "2026-03-26T01:30:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-03-26T01:30:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            }
+          ],
+          "right": [
+            {
+              "index": 0,
+              "local": "2026-03-23T01:30:00.000000+00:00",
+              "utc": "2026-03-23T01:30:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-03-23T01:30:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 1,
+              "local": "2026-03-24T01:30:00.000000+00:00",
+              "utc": "2026-03-24T01:30:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-03-24T01:30:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 2,
+              "local": "2026-03-25T01:30:00.000000+00:00",
+              "utc": "2026-03-25T01:30:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-03-25T01:30:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 3,
+              "local": "2026-03-26T01:30:00.000000+00:00",
+              "utc": "2026-03-26T01:30:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-03-26T01:30:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            }
+          ]
+        },
+        "timezone_provenance": {
+          "left": {
+            "provider": "node-intl",
+            "source": "Intl.DateTimeFormat (ICU) through Luxon",
+            "key": "Antarctica/Troll",
+            "resolved_key": "Antarctica/Troll",
+            "luxon_zone_name": "Antarctica/Troll",
+            "luxon_zone_type": "iana",
+            "icu_version": "78.3",
+            "tz_data_version": "2026e",
+            "cldr_version": "48.0",
+            "unicode_version": "17.0",
+            "tzdata_package_version": null,
+            "tzif_sha256": null,
+            "unavailable": [
+              "tzdata_package_version",
+              "tzif_sha256"
+            ]
+          },
+          "right": {
+            "provider": "node-intl",
+            "source": "Intl.DateTimeFormat (ICU) through Luxon",
+            "key": "Antarctica/Troll",
+            "resolved_key": "Antarctica/Troll",
+            "luxon_zone_name": "Antarctica/Troll",
+            "luxon_zone_type": "iana",
+            "icu_version": "78.3",
+            "tz_data_version": "2026e",
+            "cldr_version": "48.0",
+            "unicode_version": "17.0",
+            "tzdata_package_version": null,
+            "tzif_sha256": null,
+            "unavailable": [
+              "tzdata_package_version",
+              "tzif_sha256"
+            ]
+          }
+        },
+        "timezone_data": {
+          "different_tzdata_allowed": false,
+          "status": "same_runtime",
+          "versions_equal": null,
+          "tzif_equal": null,
+          "runtime_equal": true
+        },
+        "profile_differences": {
+          "configuration": [],
+          "provenance": [
+            "engine_version"
+          ],
+          "engine_version_only": true
+        },
+        "adapter_diagnostics": {
+          "left": {
+            "detail": "next occurrence is at or beyond exclusive end",
+            "stderr": "",
+            "returncode": 0
+          },
+          "right": {
+            "detail": "next occurrence is at or beyond exclusive end",
+            "stderr": "",
+            "returncode": 0
+          }
+        }
+      },
+      {
+        "schema_version": 3,
+        "name": "cron_parser_utc_control",
+        "outcome": "MATCH_WITHIN_WINDOW",
+        "reason": "equal UTC occurrence streams in the fully checked window",
+        "profiles": {
+          "left": {
+            "requested": {
+              "engine": "cron-parser",
+              "expression": "30 1 * * *",
+              "options": {},
+              "installation": "<lab>/cron-parser-5.8.1",
+              "node": "<node>",
+              "version": "5.8.1"
+            },
+            "resolved": {
+              "engine": "cron-parser",
+              "expression": "30 1 * * *",
+              "options": {},
+              "installation": "<lab>/cron-parser-5.8.1",
+              "node": "<node>",
+              "version": "5.8.1",
+              "requested_version": "5.8.1",
+              "actual_version": "5.8.1",
+              "interpreter": "<node>",
+              "runtime": {
+                "implementation": "Node.js",
+                "version": "26.13.0",
+                "versions": {
+                  "node": "26.13.0",
+                  "acorn": "8.19.0",
+                  "ada": "4.0.0",
+                  "amaro": "1.1.11",
+                  "ares": "1.34.9",
+                  "brotli": "1.2.0",
+                  "cldr": "48.0",
+                  "icu": "78.3",
+                  "libffi": "3.8.0",
+                  "lief": "1.0.0",
+                  "llhttp": "9.4.3",
+                  "merve": "1.2.2",
+                  "modules": "147",
+                  "napi": "10",
+                  "nbytes": "0.1.4",
+                  "ncrypto": "0.0.1",
+                  "nghttp2": "1.70.0",
+                  "nghttp3": "",
+                  "ngtcp2": "",
+                  "openssl": "3.5.9",
+                  "simdjson": "5.0.3",
+                  "simdutf": "7.7.0",
+                  "sqlite": "3.54.0",
+                  "tz": "2026e",
+                  "undici": "8.12.2",
+                  "unicode": "17.0",
+                  "uv": "1.52.1",
+                  "uvwasi": "0.0.23",
+                  "v8": "14.6.202.34-node.40",
+                  "zlib": "1.3.2.1-motley-456ae73",
+                  "zstd": "1.5.7"
+                },
+                "platform": "darwin",
+                "arch": "arm64",
+                "executable": "<node>",
+                "executable_realpath": "<node>",
+                "icu_environment": []
+              },
+              "installation_realpath": "<lab>/cron-parser-5.8.1",
+              "loaded": {
+                "cron-parser": {
+                  "version": "5.8.1",
+                  "path": "<lab>/cron-parser-5.8.1/node_modules/cron-parser/dist/index.js"
+                },
+                "luxon": {
+                  "version": "3.7.2",
+                  "path": "<lab>/cron-parser-5.8.1/node_modules/luxon/build/node/luxon.js"
+                }
+              },
+              "timezone": {
+                "provider": "node-intl",
+                "source": "Intl.DateTimeFormat (ICU) through Luxon",
+                "key": "UTC",
+                "resolved_key": "UTC",
+                "luxon_zone_name": "UTC",
+                "luxon_zone_type": "fixed",
+                "icu_version": "78.3",
+                "tz_data_version": "2026e",
+                "cldr_version": "48.0",
+                "unicode_version": "17.0",
+                "tzdata_package_version": null,
+                "tzif_sha256": null,
+                "unavailable": [
+                  "tzdata_package_version",
+                  "tzif_sha256"
+                ]
+              }
+            }
+          },
+          "right": {
+            "requested": {
+              "engine": "cron-parser",
+              "expression": "30 1 * * *",
+              "options": {},
+              "installation": "<lab>/cron-parser-5.9.0",
+              "node": "<node>",
+              "version": "5.9.0"
+            },
+            "resolved": {
+              "engine": "cron-parser",
+              "expression": "30 1 * * *",
+              "options": {},
+              "installation": "<lab>/cron-parser-5.9.0",
+              "node": "<node>",
+              "version": "5.9.0",
+              "requested_version": "5.9.0",
+              "actual_version": "5.9.0",
+              "interpreter": "<node>",
+              "runtime": {
+                "implementation": "Node.js",
+                "version": "26.13.0",
+                "versions": {
+                  "node": "26.13.0",
+                  "acorn": "8.19.0",
+                  "ada": "4.0.0",
+                  "amaro": "1.1.11",
+                  "ares": "1.34.9",
+                  "brotli": "1.2.0",
+                  "cldr": "48.0",
+                  "icu": "78.3",
+                  "libffi": "3.8.0",
+                  "lief": "1.0.0",
+                  "llhttp": "9.4.3",
+                  "merve": "1.2.2",
+                  "modules": "147",
+                  "napi": "10",
+                  "nbytes": "0.1.4",
+                  "ncrypto": "0.0.1",
+                  "nghttp2": "1.70.0",
+                  "nghttp3": "",
+                  "ngtcp2": "",
+                  "openssl": "3.5.9",
+                  "simdjson": "5.0.3",
+                  "simdutf": "7.7.0",
+                  "sqlite": "3.54.0",
+                  "tz": "2026e",
+                  "undici": "8.12.2",
+                  "unicode": "17.0",
+                  "uv": "1.52.1",
+                  "uvwasi": "0.0.23",
+                  "v8": "14.6.202.34-node.40",
+                  "zlib": "1.3.2.1-motley-456ae73",
+                  "zstd": "1.5.7"
+                },
+                "platform": "darwin",
+                "arch": "arm64",
+                "executable": "<node>",
+                "executable_realpath": "<node>",
+                "icu_environment": []
+              },
+              "installation_realpath": "<lab>/cron-parser-5.9.0",
+              "loaded": {
+                "cron-parser": {
+                  "version": "5.9.0",
+                  "path": "<lab>/cron-parser-5.9.0/node_modules/cron-parser/dist/index.js"
+                },
+                "luxon": {
+                  "version": "3.7.2",
+                  "path": "<lab>/cron-parser-5.9.0/node_modules/luxon/build/node/luxon.js"
+                }
+              },
+              "timezone": {
+                "provider": "node-intl",
+                "source": "Intl.DateTimeFormat (ICU) through Luxon",
+                "key": "UTC",
+                "resolved_key": "UTC",
+                "luxon_zone_name": "UTC",
+                "luxon_zone_type": "fixed",
+                "icu_version": "78.3",
+                "tz_data_version": "2026e",
+                "cldr_version": "48.0",
+                "unicode_version": "17.0",
+                "tzdata_package_version": null,
+                "tzif_sha256": null,
+                "unavailable": [
+                  "tzdata_package_version",
+                  "tzif_sha256"
+                ]
+              }
+            }
+          }
+        },
+        "window": {
+          "start": "2026-03-27T00:00:00.000000Z",
+          "end": "2026-03-31T00:00:00.000000Z",
+          "bounds": "[start, end)",
+          "timezone": "UTC"
+        },
+        "completeness": {
+          "window_checked": true,
+          "left": {
+            "complete": true,
+            "accepted": true,
+            "count": 4,
+            "observed_count": 4,
+            "termination_reason": "complete",
+            "diagnostics": {
+              "detail": "next occurrence is at or beyond exclusive end",
+              "stderr": "",
+              "returncode": 0
+            }
+          },
+          "right": {
+            "complete": true,
+            "accepted": true,
+            "count": 4,
+            "observed_count": 4,
+            "termination_reason": "complete",
+            "diagnostics": {
+              "detail": "next occurrence is at or beyond exclusive end",
+              "stderr": "",
+              "returncode": 0
+            }
+          }
+        },
+        "limits": {
+          "deadline_seconds": 10.0,
+          "max_occurrences": 10000,
+          "stdout_bytes": 8388608,
+          "stderr_bytes": 65536,
+          "context": 10
+        },
+        "termination_reason": {
+          "left": "complete",
+          "right": "complete"
+        },
+        "occurrence_counts": {
+          "left": 4,
+          "right": 4
+        },
+        "empty_window": false,
+        "first_divergence": null,
+        "context": {
+          "left": [
+            {
+              "index": 0,
+              "local": "2026-03-27T01:30:00.000000+00:00",
+              "utc": "2026-03-27T01:30:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-03-27T01:30:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 1,
+              "local": "2026-03-28T01:30:00.000000+00:00",
+              "utc": "2026-03-28T01:30:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-03-28T01:30:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 2,
+              "local": "2026-03-29T01:30:00.000000+00:00",
+              "utc": "2026-03-29T01:30:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-03-29T01:30:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 3,
+              "local": "2026-03-30T01:30:00.000000+00:00",
+              "utc": "2026-03-30T01:30:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-03-30T01:30:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            }
+          ],
+          "right": [
+            {
+              "index": 0,
+              "local": "2026-03-27T01:30:00.000000+00:00",
+              "utc": "2026-03-27T01:30:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-03-27T01:30:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 1,
+              "local": "2026-03-28T01:30:00.000000+00:00",
+              "utc": "2026-03-28T01:30:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-03-28T01:30:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 2,
+              "local": "2026-03-29T01:30:00.000000+00:00",
+              "utc": "2026-03-29T01:30:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-03-29T01:30:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 3,
+              "local": "2026-03-30T01:30:00.000000+00:00",
+              "utc": "2026-03-30T01:30:00.000000Z",
+              "offset_seconds": 0,
+              "fold": 0,
+              "roundtrip_local": "2026-03-30T01:30:00.000000+00:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            }
+          ]
+        },
+        "timezone_provenance": {
+          "left": {
+            "provider": "node-intl",
+            "source": "Intl.DateTimeFormat (ICU) through Luxon",
+            "key": "UTC",
+            "resolved_key": "UTC",
+            "luxon_zone_name": "UTC",
+            "luxon_zone_type": "fixed",
+            "icu_version": "78.3",
+            "tz_data_version": "2026e",
+            "cldr_version": "48.0",
+            "unicode_version": "17.0",
+            "tzdata_package_version": null,
+            "tzif_sha256": null,
+            "unavailable": [
+              "tzdata_package_version",
+              "tzif_sha256"
+            ]
+          },
+          "right": {
+            "provider": "node-intl",
+            "source": "Intl.DateTimeFormat (ICU) through Luxon",
+            "key": "UTC",
+            "resolved_key": "UTC",
+            "luxon_zone_name": "UTC",
+            "luxon_zone_type": "fixed",
+            "icu_version": "78.3",
+            "tz_data_version": "2026e",
+            "cldr_version": "48.0",
+            "unicode_version": "17.0",
+            "tzdata_package_version": null,
+            "tzif_sha256": null,
+            "unavailable": [
+              "tzdata_package_version",
+              "tzif_sha256"
+            ]
+          }
+        },
+        "timezone_data": {
+          "different_tzdata_allowed": false,
+          "status": "same_runtime",
+          "versions_equal": null,
+          "tzif_equal": null,
+          "runtime_equal": true
+        },
+        "profile_differences": {
+          "configuration": [],
+          "provenance": [
+            "engine_version"
+          ],
+          "engine_version_only": true
+        },
+        "adapter_diagnostics": {
+          "left": {
+            "detail": "next occurrence is at or beyond exclusive end",
+            "stderr": "",
+            "returncode": 0
+          },
+          "right": {
+            "detail": "next occurrence is at or beyond exclusive end",
+            "stderr": "",
+            "returncode": 0
+          }
+        }
+      },
+      {
+        "schema_version": 3,
+        "name": "cron_parser_new_york_gap_control",
+        "outcome": "MATCH_WITHIN_WINDOW",
+        "reason": "equal UTC occurrence streams in the fully checked window",
+        "profiles": {
+          "left": {
+            "requested": {
+              "engine": "cron-parser",
+              "expression": "30 2 * * *",
+              "options": {},
+              "installation": "<lab>/cron-parser-5.8.1",
+              "node": "<node>",
+              "version": "5.8.1"
+            },
+            "resolved": {
+              "engine": "cron-parser",
+              "expression": "30 2 * * *",
+              "options": {},
+              "installation": "<lab>/cron-parser-5.8.1",
+              "node": "<node>",
+              "version": "5.8.1",
+              "requested_version": "5.8.1",
+              "actual_version": "5.8.1",
+              "interpreter": "<node>",
+              "runtime": {
+                "implementation": "Node.js",
+                "version": "26.13.0",
+                "versions": {
+                  "node": "26.13.0",
+                  "acorn": "8.19.0",
+                  "ada": "4.0.0",
+                  "amaro": "1.1.11",
+                  "ares": "1.34.9",
+                  "brotli": "1.2.0",
+                  "cldr": "48.0",
+                  "icu": "78.3",
+                  "libffi": "3.8.0",
+                  "lief": "1.0.0",
+                  "llhttp": "9.4.3",
+                  "merve": "1.2.2",
+                  "modules": "147",
+                  "napi": "10",
+                  "nbytes": "0.1.4",
+                  "ncrypto": "0.0.1",
+                  "nghttp2": "1.70.0",
+                  "nghttp3": "",
+                  "ngtcp2": "",
+                  "openssl": "3.5.9",
+                  "simdjson": "5.0.3",
+                  "simdutf": "7.7.0",
+                  "sqlite": "3.54.0",
+                  "tz": "2026e",
+                  "undici": "8.12.2",
+                  "unicode": "17.0",
+                  "uv": "1.52.1",
+                  "uvwasi": "0.0.23",
+                  "v8": "14.6.202.34-node.40",
+                  "zlib": "1.3.2.1-motley-456ae73",
+                  "zstd": "1.5.7"
+                },
+                "platform": "darwin",
+                "arch": "arm64",
+                "executable": "<node>",
+                "executable_realpath": "<node>",
+                "icu_environment": []
+              },
+              "installation_realpath": "<lab>/cron-parser-5.8.1",
+              "loaded": {
+                "cron-parser": {
+                  "version": "5.8.1",
+                  "path": "<lab>/cron-parser-5.8.1/node_modules/cron-parser/dist/index.js"
+                },
+                "luxon": {
+                  "version": "3.7.2",
+                  "path": "<lab>/cron-parser-5.8.1/node_modules/luxon/build/node/luxon.js"
+                }
+              },
+              "timezone": {
+                "provider": "node-intl",
+                "source": "Intl.DateTimeFormat (ICU) through Luxon",
+                "key": "America/New_York",
+                "resolved_key": "America/New_York",
+                "luxon_zone_name": "America/New_York",
+                "luxon_zone_type": "iana",
+                "icu_version": "78.3",
+                "tz_data_version": "2026e",
+                "cldr_version": "48.0",
+                "unicode_version": "17.0",
+                "tzdata_package_version": null,
+                "tzif_sha256": null,
+                "unavailable": [
+                  "tzdata_package_version",
+                  "tzif_sha256"
+                ]
+              }
+            }
+          },
+          "right": {
+            "requested": {
+              "engine": "cron-parser",
+              "expression": "30 2 * * *",
+              "options": {},
+              "installation": "<lab>/cron-parser-5.9.0",
+              "node": "<node>",
+              "version": "5.9.0"
+            },
+            "resolved": {
+              "engine": "cron-parser",
+              "expression": "30 2 * * *",
+              "options": {},
+              "installation": "<lab>/cron-parser-5.9.0",
+              "node": "<node>",
+              "version": "5.9.0",
+              "requested_version": "5.9.0",
+              "actual_version": "5.9.0",
+              "interpreter": "<node>",
+              "runtime": {
+                "implementation": "Node.js",
+                "version": "26.13.0",
+                "versions": {
+                  "node": "26.13.0",
+                  "acorn": "8.19.0",
+                  "ada": "4.0.0",
+                  "amaro": "1.1.11",
+                  "ares": "1.34.9",
+                  "brotli": "1.2.0",
+                  "cldr": "48.0",
+                  "icu": "78.3",
+                  "libffi": "3.8.0",
+                  "lief": "1.0.0",
+                  "llhttp": "9.4.3",
+                  "merve": "1.2.2",
+                  "modules": "147",
+                  "napi": "10",
+                  "nbytes": "0.1.4",
+                  "ncrypto": "0.0.1",
+                  "nghttp2": "1.70.0",
+                  "nghttp3": "",
+                  "ngtcp2": "",
+                  "openssl": "3.5.9",
+                  "simdjson": "5.0.3",
+                  "simdutf": "7.7.0",
+                  "sqlite": "3.54.0",
+                  "tz": "2026e",
+                  "undici": "8.12.2",
+                  "unicode": "17.0",
+                  "uv": "1.52.1",
+                  "uvwasi": "0.0.23",
+                  "v8": "14.6.202.34-node.40",
+                  "zlib": "1.3.2.1-motley-456ae73",
+                  "zstd": "1.5.7"
+                },
+                "platform": "darwin",
+                "arch": "arm64",
+                "executable": "<node>",
+                "executable_realpath": "<node>",
+                "icu_environment": []
+              },
+              "installation_realpath": "<lab>/cron-parser-5.9.0",
+              "loaded": {
+                "cron-parser": {
+                  "version": "5.9.0",
+                  "path": "<lab>/cron-parser-5.9.0/node_modules/cron-parser/dist/index.js"
+                },
+                "luxon": {
+                  "version": "3.7.2",
+                  "path": "<lab>/cron-parser-5.9.0/node_modules/luxon/build/node/luxon.js"
+                }
+              },
+              "timezone": {
+                "provider": "node-intl",
+                "source": "Intl.DateTimeFormat (ICU) through Luxon",
+                "key": "America/New_York",
+                "resolved_key": "America/New_York",
+                "luxon_zone_name": "America/New_York",
+                "luxon_zone_type": "iana",
+                "icu_version": "78.3",
+                "tz_data_version": "2026e",
+                "cldr_version": "48.0",
+                "unicode_version": "17.0",
+                "tzdata_package_version": null,
+                "tzif_sha256": null,
+                "unavailable": [
+                  "tzdata_package_version",
+                  "tzif_sha256"
+                ]
+              }
+            }
+          }
+        },
+        "window": {
+          "start": "2026-03-07T00:00:00.000000Z",
+          "end": "2026-03-11T00:00:00.000000Z",
+          "bounds": "[start, end)",
+          "timezone": "America/New_York"
+        },
+        "completeness": {
+          "window_checked": true,
+          "left": {
+            "complete": true,
+            "accepted": true,
+            "count": 4,
+            "observed_count": 4,
+            "termination_reason": "complete",
+            "diagnostics": {
+              "detail": "next occurrence is at or beyond exclusive end",
+              "stderr": "",
+              "returncode": 0
+            }
+          },
+          "right": {
+            "complete": true,
+            "accepted": true,
+            "count": 4,
+            "observed_count": 4,
+            "termination_reason": "complete",
+            "diagnostics": {
+              "detail": "next occurrence is at or beyond exclusive end",
+              "stderr": "",
+              "returncode": 0
+            }
+          }
+        },
+        "limits": {
+          "deadline_seconds": 10.0,
+          "max_occurrences": 10000,
+          "stdout_bytes": 8388608,
+          "stderr_bytes": 65536,
+          "context": 10
+        },
+        "termination_reason": {
+          "left": "complete",
+          "right": "complete"
+        },
+        "occurrence_counts": {
+          "left": 4,
+          "right": 4
+        },
+        "empty_window": false,
+        "first_divergence": null,
+        "context": {
+          "left": [
+            {
+              "index": 0,
+              "local": "2026-03-07T02:30:00.000000-05:00",
+              "utc": "2026-03-07T07:30:00.000000Z",
+              "offset_seconds": -18000,
+              "fold": 0,
+              "roundtrip_local": "2026-03-07T02:30:00.000000-05:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 1,
+              "local": "2026-03-08T03:30:00.000000-04:00",
+              "utc": "2026-03-08T07:30:00.000000Z",
+              "offset_seconds": -14400,
+              "fold": 0,
+              "roundtrip_local": "2026-03-08T03:30:00.000000-04:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 2,
+              "local": "2026-03-09T02:30:00.000000-04:00",
+              "utc": "2026-03-09T06:30:00.000000Z",
+              "offset_seconds": -14400,
+              "fold": 0,
+              "roundtrip_local": "2026-03-09T02:30:00.000000-04:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 3,
+              "local": "2026-03-10T02:30:00.000000-04:00",
+              "utc": "2026-03-10T06:30:00.000000Z",
+              "offset_seconds": -14400,
+              "fold": 0,
+              "roundtrip_local": "2026-03-10T02:30:00.000000-04:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            }
+          ],
+          "right": [
+            {
+              "index": 0,
+              "local": "2026-03-07T02:30:00.000000-05:00",
+              "utc": "2026-03-07T07:30:00.000000Z",
+              "offset_seconds": -18000,
+              "fold": 0,
+              "roundtrip_local": "2026-03-07T02:30:00.000000-05:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 1,
+              "local": "2026-03-08T03:30:00.000000-04:00",
+              "utc": "2026-03-08T07:30:00.000000Z",
+              "offset_seconds": -14400,
+              "fold": 0,
+              "roundtrip_local": "2026-03-08T03:30:00.000000-04:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 2,
+              "local": "2026-03-09T02:30:00.000000-04:00",
+              "utc": "2026-03-09T06:30:00.000000Z",
+              "offset_seconds": -14400,
+              "fold": 0,
+              "roundtrip_local": "2026-03-09T02:30:00.000000-04:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            },
+            {
+              "index": 3,
+              "local": "2026-03-10T02:30:00.000000-04:00",
+              "utc": "2026-03-10T06:30:00.000000Z",
+              "offset_seconds": -14400,
+              "fold": 0,
+              "roundtrip_local": "2026-03-10T02:30:00.000000-04:00",
+              "roundtrip_fold": 0,
+              "nonexistent_local": false
+            }
+          ]
+        },
+        "timezone_provenance": {
+          "left": {
+            "provider": "node-intl",
+            "source": "Intl.DateTimeFormat (ICU) through Luxon",
+            "key": "America/New_York",
+            "resolved_key": "America/New_York",
+            "luxon_zone_name": "America/New_York",
+            "luxon_zone_type": "iana",
+            "icu_version": "78.3",
+            "tz_data_version": "2026e",
+            "cldr_version": "48.0",
+            "unicode_version": "17.0",
+            "tzdata_package_version": null,
+            "tzif_sha256": null,
+            "unavailable": [
+              "tzdata_package_version",
+              "tzif_sha256"
+            ]
+          },
+          "right": {
+            "provider": "node-intl",
+            "source": "Intl.DateTimeFormat (ICU) through Luxon",
+            "key": "America/New_York",
+            "resolved_key": "America/New_York",
+            "luxon_zone_name": "America/New_York",
+            "luxon_zone_type": "iana",
+            "icu_version": "78.3",
+            "tz_data_version": "2026e",
+            "cldr_version": "48.0",
+            "unicode_version": "17.0",
+            "tzdata_package_version": null,
+            "tzif_sha256": null,
+            "unavailable": [
+              "tzdata_package_version",
+              "tzif_sha256"
+            ]
+          }
+        },
+        "timezone_data": {
+          "different_tzdata_allowed": false,
+          "status": "same_runtime",
+          "versions_equal": null,
+          "tzif_equal": null,
+          "runtime_equal": true
+        },
+        "profile_differences": {
+          "configuration": [],
+          "provenance": [
+            "engine_version"
+          ],
+          "engine_version_only": true
+        },
+        "adapter_diagnostics": {
+          "left": {
+            "detail": "next occurrence is at or beyond exclusive end",
+            "stderr": "",
+            "returncode": 0
+          },
+          "right": {
+            "detail": "next occurrence is at or beyond exclusive end",
+            "stderr": "",
+            "returncode": 0
+          }
+        }
+      }
+    ]
+  }
+}

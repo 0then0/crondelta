@@ -7,7 +7,7 @@ from pathlib import Path
 
 from . import __version__
 from .comparison import EXIT_CODES, compare, input_report
-from .config import Case, InvalidInput, UnsupportedScope, keys
+from .config import ENGINES, Case, InvalidInput, UnsupportedScope, keys
 from .reports import human
 
 
@@ -27,10 +27,14 @@ def parser() -> argparse.ArgumentParser:
     command.add_argument("--format", choices=("human", "json"), default="human")
     command.add_argument("--expression", help="shared expression; each side can override")
     for side in ("left", "right"):
-        command.add_argument(f"--{side}-engine", choices=("croniter", "apscheduler"))
+        command.add_argument(f"--{side}-engine", choices=ENGINES)
         command.add_argument(f"--{side}-expression")
         command.add_argument(f"--{side}-options", help="JSON object")
         command.add_argument(f"--{side}-python")
+        command.add_argument(
+            f"--{side}-installation",
+            help="cron-parser: directory containing node_modules/cron-parser (never installed)",
+        )
         command.add_argument(f"--{side}-version", help="exact required installed engine version")
         command.add_argument(
             f"--{side}-tzdata-version",
@@ -41,6 +45,9 @@ def parser() -> argparse.ArgumentParser:
         action="store_const",
         const=True,
         help="compare sides that resolve different timezone data instead of reporting UNRESOLVED",
+    )
+    command.add_argument(
+        "--node", help="cron-parser: the Node.js executable used for both sides (required)"
     )
     command.add_argument("--timezone")
     command.add_argument("--start")
@@ -82,9 +89,19 @@ def load_cases(args) -> list[Case]:
             raise InvalidInput("case names must be unique")
         return parsed
     data = {key: getattr(args, key) for key in ("timezone", "start", "end")}
+    if args.node is not None:
+        data["node"] = args.node
     for side in ("left", "right"):
         profile = {}
-        for key in ("engine", "expression", "options", "python", "version", "tzdata_version"):
+        for key in (
+            "engine",
+            "expression",
+            "options",
+            "python",
+            "installation",
+            "version",
+            "tzdata_version",
+        ):
             value = getattr(args, f"{side}_{key}")
             if key == "expression" and value is None:
                 value = args.expression

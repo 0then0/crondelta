@@ -2,12 +2,15 @@ import os
 import struct
 import subprocess
 import sys
-from datetime import UTC, datetime
+from datetime import datetime
+from datetime import timezone as dt_timezone
 from pathlib import Path
 
 import pytest
 
 from crondelta.config import Case
+
+UTC = dt_timezone.utc
 
 
 @pytest.fixture

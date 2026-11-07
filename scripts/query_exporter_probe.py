@@ -10,8 +10,11 @@ import importlib.metadata
 import importlib.resources
 import io
 import json
-from datetime import UTC, datetime
+from datetime import datetime
+from datetime import timezone as dt_timezone
 from zoneinfo import ZoneInfo, reset_tzpath
+
+UTC = dt_timezone.utc
 
 
 def probe(engine, expression, start, end):

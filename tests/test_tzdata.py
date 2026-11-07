@@ -12,7 +12,8 @@ import os
 import subprocess
 import time
 from dataclasses import replace
-from datetime import UTC, datetime
+from datetime import datetime
+from datetime import timezone as dt_timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo, reset_tzpath
 
@@ -26,6 +27,8 @@ from crondelta.cli import main
 from crondelta.comparison import compare, compare_streams, profile_differences
 from crondelta.config import Case, InvalidInput
 from crondelta.reports import human
+
+UTC = dt_timezone.utc
 
 OLD, NEW, REISSUED, PARTIAL = "2100.1", "2100.2", "2100.3", "2100.4"
 WINDOW = {"start": "2026-11-02T00:00:00Z", "end": "2026-11-04T00:00:00Z"}

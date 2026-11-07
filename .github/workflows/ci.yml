@@ -15,16 +15,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ['3.11', '3.13', '3.14']
+        python: ['3.10', '3.11', '3.12', '3.13', '3.14', '3.15']
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-python@v7.1.0
         with:
           python-version: ${{ matrix.python }}
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '24'
       - uses: astral-sh/setup-uv@v10.3.2
         with:
           enable-cache: true
       - name: Verify engines, resources, controls, and installed wheel
         env:
           UV_PYTHON: ${{ matrix.python }}
+          CRONDELTA_REQUIRE_NODE: '1'
         run: sh scripts/verify.sh

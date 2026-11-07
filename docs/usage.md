@@ -23,7 +23,8 @@ window. The report has zero counts and `empty_window: true`.
 Each side accepts the following profile flags, replacing `left` with `right`
 for the other side:
 
-- `--left-engine`: `croniter` or `apscheduler`; required.
+- `--left-engine`: `croniter`, `apscheduler`, or `cron-parser`; required. The JavaScript
+  engine has its own [profile flags](#comparing-cron-parser-installations).
 - `--left-expression`: independent expression; falls back to `--expression`
   only when omitted. Expressions contain exactly five fields and at most
   1,024 characters.
@@ -64,11 +65,57 @@ uv run crondelta compare \
   --start 2026-10-01T00:00:00Z --end 2026-10-08T00:00:00Z
 ```
 
-Target interpreters need Python 3.11+, their engine's dependencies, and tzdata.
+Target interpreters need Python 3.10+, their engine's dependencies, and tzdata.
 The worker is shipped with CronDelta and runs in each target interpreter.
 Reports preserve both requested and actual versions, interpreter paths, and
 runtime versions. Use trusted executables: worker isolation bounds resources
 and is not a sandbox for untrusted Python code.
+
+## Comparing cron-parser installations
+
+To ask whether updating the JavaScript library [`cron-parser`](https://github.com/harrisiirak/cron-parser)
+changes when existing schedules fire, select two prepared installations and one Node.js
+executable. Node.js, npm, and both installations are external prerequisites that you prepare
+yourself (for example with `npm ci`); `compare` never installs, downloads, or creates anything.
+
+```sh
+crondelta compare \
+  --node /usr/local/bin/node \
+  --left-engine cron-parser --left-installation /opt/old --left-version 5.8.1 \
+  --right-engine cron-parser --right-installation /opt/new --right-version 5.9.0 \
+  --expression '30 1 * * *' --timezone Antarctica/Troll \
+  --start 2026-03-27T00:00:00Z --end 2026-03-31T00:00:00Z
+```
+
+- `--node` is one executable shared by both sides and is required. Relative names are
+  resolved like `--left-python`. `NODE_OPTIONS` and `NODE_PATH` are removed from the worker's
+  environment. In a manifest it is the case key `node`.
+- `--left-installation` is the directory that contains `node_modules/cron-parser`
+  (manifest profile key `installation`); `--left-version` is the exact version you expect
+  (key `version`). Both are required for each side. `--left-python`, tzdata flags,
+  `--allow-different-tzdata`, and engine options do not apply.
+- The library and its Luxon are loaded only from the selected installation. A missing
+  package, a missing installation directory, a Luxon found only above the installation (or
+  through `NODE_PATH` or a global folder), or a `node_modules/cron-parser` that is a link
+  leaving the installation produce a `missing_dependency` error, never a fallback. A different
+  installed version is `UNRESOLVED` (`version_mismatch`).
+- Expressions have exactly five fields. Each side's expression may be overridden with
+  `--left-expression` / `--right-expression`. Windows, limits, and outcomes behave as for the
+  Python engines. Comparing cron-parser with croniter or APScheduler is outside this scope
+  and is `UNRESOLVED`.
+
+Enumeration uses only `next()`. `currentDate` is exclusive, so the worker anchors one whole UTC
+minute before `start` and discards earlier results; no epsilon is subtracted. An occurrence
+exactly at `start` is included and one exactly at `end` is excluded. cron-parser has no
+end-of-schedule result, so a side is complete only when an occurrence at or beyond `end` is
+returned. cron-parser's own loop-limit error is an unresolved `search_limit`; any other exception
+is an `engine_error`; a plain `Error` from `parse()` is a rejected expression, whereas other
+error types are `engine_error`. Reports use [schema version 3](protocol.md#report-v3-nodejs);
+their timezone data is the Node.js runtime's ICU data, not a tzdata package. If the two sides'
+Luxon versions differ, the report lists that factor and the difference cannot be attributed to
+cron-parser alone. The worker runs JavaScript from the selected installation: use trusted
+executables and installations. Limits bound resources and are not a sandbox. The
+[upgrade case](cron-parser-upgrade.md) shows a complete example.
 
 ## Comparing timezone database versions
 

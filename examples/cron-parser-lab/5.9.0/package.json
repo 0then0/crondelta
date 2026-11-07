@@ -1,0 +1,10 @@
+{
+  "name": "crondelta-cron-parser-lab-5-9-0",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Disposable validation installation for CronDelta",
+  "dependencies": {
+    "cron-parser": "5.9.0",
+    "luxon": "3.7.2"
+  }
+}
