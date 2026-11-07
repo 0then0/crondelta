@@ -10,10 +10,10 @@ spec.loader.exec_module(release)
 
 
 def test_current_release_metadata():
-    assert release.check_release(ROOT, "v0.2.0") == "0.2.0"
+    assert release.check_release(ROOT, "v0.3.0") == "0.3.0"
 
 
-@pytest.mark.parametrize("tag", ["0.2.0", "v0.1.0", "v0.2.0-extra", ""])
+@pytest.mark.parametrize("tag", ["0.3.0", "v0.2.0", "v0.3.0-extra", ""])
 def test_wrong_release_tag_is_rejected(tag):
     with pytest.raises(ValueError, match="release tag must be"):
         release.check_release(ROOT, tag)

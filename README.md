@@ -22,7 +22,7 @@ from PyPI. If the release is not yet available there, use the source installatio
 below.
 
 ```sh
-uv tool install crondelta==0.2.0
+uv tool install crondelta==0.3.0
 crondelta compare \
   --left-engine croniter --left-version 6.2.4 \
   --right-engine apscheduler --right-version 3.11.3 \
@@ -56,7 +56,7 @@ the repository. To build and install from source instead:
 git clone https://github.com/0then0/crondelta.git
 cd crondelta
 uv build
-uv tool install ./dist/crondelta-0.2.0-py3-none-any.whl
+uv tool install ./dist/crondelta-0.3.0-py3-none-any.whl
 crondelta --version
 ```
 
@@ -89,7 +89,6 @@ executes jobs, or connects to a database.
   external prerequisites; nothing is installed, and Python engines are not compared with it.
   Reports (schema version 3) record the loaded cron-parser and Luxon versions and the
   Node.js, ICU, and timezone data versions; Node.js has no tzdata package or TZif file.
-  Not part of the published 0.2.0 package; see the Unreleased section of the changelog.
   See the [cron-parser upgrade case](https://github.com/0then0/crondelta/blob/main/docs/cron-parser-upgrade.md).
 - **Evidence:** exact UTC datetimes, original local time, offset, fold, and UTC
   round-trip. Deadlines and output/occurrence limits bound enumeration. An
