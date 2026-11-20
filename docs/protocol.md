@@ -6,9 +6,10 @@ them. For command-line inputs and exit codes, see the [CLI reference](usage.md).
 
 ## Report versions
 
-Reports have `schema_version` **1** unless the case sets `allow_different_tzdata`,
-in which case it is **2**, or compares `cron-parser` installations, in which case it is
-**3** ([Report v3](#report-v3-nodejs)). Version 1 guarantees that `MATCH_WITHIN_WINDOW` and
+Python comparisons produce `schema_version` **1**, or **2** when the case sets
+`allow_different_tzdata`. Comparisons of `cron-parser` installations use **3**
+([Report v3](#report-v3-nodejs)), and cases with a `robfig/cron` profile use **4**
+([Report v4](#report-v4-gorobfigcron)). Version 1 guarantees that `MATCH_WITHIN_WINDOW` and
 `DIFFERENT` come from sides with identical timezone data (the same tzdata version
 and TZif bytes). Version 2 withdraws that guarantee, so a consumer that relies on it
 can reject reports with another version. Fields of versions 1 and 2 are otherwise
@@ -91,6 +92,30 @@ with these differences:
 Because the zone rules come from the runtime's ICU data, equal streams show equality for
 that runtime only. Consumers that rely on the version 1 guarantee must reject version 3.
 
+## Report v4 (Go/robfig/cron)
+
+Version 4 keeps the common case envelope. Any Python side retains its existing profile and
+timezone provenance. A Go profile's `requested` object includes `engine`, `expression`,
+`options` (empty), `worker`, `version`, `tzif_path`, and `tzif_sha256`. The last two
+fields are null when no file is pinned. The `resolved` object preserves the request and
+adds `requested_version`, `actual_version`, `interpreter` (the worker executable),
+and `runtime` with `implementation` (`Go`), `version`, `platform`, `arch`,
+`executable`, and `executable_realpath`. `loaded` describes `github.com/robfig/cron/v3`
+with its `version` and Go module `sum` from the binary's build information.
+
+Go timezone provenance has `provider` (`go`), the requested IANA `key`, `source`,
+`tzdata_version`, `tzif_sha256`, and `unavailable`. A pinned file has its measured
+`tzif_sha256` and source `Go time.LoadLocationFromTZData`. An unpinned `UTC` request
+reports source `Go time.UTC`. Go's ordinary named timezone lookup leaves the source
+unavailable. A standalone TZif file carries no confirmed `tzdata_version`. Unavailable
+values are null and are listed in `unavailable`.
+
+`timezone_data.tzif_equal` tells whether two known digests match. When it is unavailable,
+`status` is `unresolved`. When two digests are known, `status` is `identical` or
+`different`. The latter requires `allow_different_tzdata` to compare the UTC streams.
+`versions_equal` is null for version 4 because the Go side carries no confirmed database
+version. A complete window describes dates for the data each side actually used.
+
 ## Enumeration contract
 
 Only exact aware UTC datetime equality is used in comparison. Input ISO formats
@@ -130,6 +155,10 @@ and `NODE_PATH` removed from the environment (see [Node.js worker](#nodejs-worke
 and the coordinator's validation are the same, except for the profile and timezone provenance
 described in [Report v3](#report-v3-nodejs).
 
+A `robfig/cron` profile runs `[worker_path]`. The user supplies the binary explicitly.
+It uses the same record framing and per-adapter limits, with the profile and timezone provenance
+described in [Report v4](#report-v4-gorobfigcron).
+
 Stdin is one JSON object: `protocol_version: 1`, `profile`, `timezone`, `start`,
 `end`, `max_occurrences`. The profile may pin `tzdata_version`. The worker reads at most 64 KiB. The coordinator's
 validated profiles are smaller than this bound. Stdout is UTF-8 NDJSON, with
@@ -165,16 +194,15 @@ invalidates the stream. This remains an engine error when a descendant keeps
 the pipes open. Termination by the coordinator to enforce a deadline or output
 limit preserves that resource-limit diagnosis.
 
-The worker emits `version_mismatch` (engine) or else `tzdata_mismatch` right after
+The Python worker emits `version_mismatch` (engine) or else `tzdata_mismatch` right after
 the profile when a pin is unmet, without parsing or enumerating. The coordinator
 rejects a worker that continues after an unmet pin, reports either mismatch status
 without one, or returns provenance with another `source`, a different
 `requested_tzdata_version`, a nonempty search path, or a malformed digest.
 An unavailable zone ends with `invalid_timezone` and names the tzdata version.
 
-Transport v1 itself is unchanged: the worker ships inside the same CronDelta
-package as the coordinator, so these record fields are additive and no separate
-protocol version is needed.
+Both bundled workers and the separately built Go worker use transport v1. Their
+profile and provenance fields depend on the requested engine.
 
 Malformed records, missing terminal records, inconsistent local/UTC evidence,
 extra records after termination, occurrence overflow, changed requested profiles,
@@ -222,3 +250,26 @@ declares 18+) and that installation.
   is derived from the instant and the zone offsets only, and is 1 when the same wall-clock
   reading occurred earlier (within the preceding 36 hours) with a larger offset. A repeated
   hour therefore keeps two distinct UTC instants whose `offset_seconds` and `fold` differ.
+
+## Go worker
+
+`workers/robfig-cron` builds the worker from `github.com/robfig/cron/v3` pinned at
+`v3.0.1`. For ordinary zone lookup, the worker passes `TZ=<key> <expression>` to
+`cron.ParseStandard`, as does the Kubernetes v1.34.0 controller when `.spec.timeZone`
+is set. With a pinned file, the worker loads the exact hashed bytes via
+`time.LoadLocationFromTZData` and supplies that location to the parsed `SpecSchedule`.
+The public scheduler then uses those rules for every `Schedule.Next` call.
+[Kubernetes timezone formatting](https://github.com/kubernetes/kubernetes/blob/v1.34.0/pkg/controller/cronjob/cronjob_controllerv2.go#L761-L778),
+[robfig/cron timezone handling and search](https://github.com/robfig/cron/blob/v3.0.1/spec.go#L56-L93).
+
+- `Next` returns a whole-second instant strictly after its argument. The initial
+  argument is one nanosecond before `start`, so the first result can be exactly at
+  `start`. Subsequent arguments are the last result. The worker checks UTC order and
+  excludes the first result at or beyond `end`, which confirms completion.
+- A zero `time.Time` from `Next` means `search_limit`, including when the expression
+  may never yield. Reaching the result limit triggers one extra lookup to distinguish
+  `complete`, `occurrence_cap`, and `search_limit`. A worker crash is an `engine_error`.
+- An unavailable timezone produces `invalid_timezone`. A mismatched file digest produces
+  `tzdata_mismatch`, and a file the worker cannot read or load produces `engine_error`.
+- A repeated wall time can appear twice with distinct UTC instants, offsets, and
+  folds. Local evidence represents each actual instant in the schedule's zone.

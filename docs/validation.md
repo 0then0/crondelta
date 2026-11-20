@@ -29,6 +29,10 @@ from the committed lockfiles ([cron-parser upgrade](cron-parser-upgrade.md)); wi
 those tests are skipped and a message says so, unless `CRONDELTA_REQUIRE_NODE=1`, which CI
 sets, turns their absence into a failure. All temporary environments are removed
 when verification exits.
+With Go 1.19 or later on `PATH`, the helper also tests and builds the pinned
+`robfig/cron` worker in its disposable directory, then exercises it through the
+Python CLI. To run those tests with an existing binary, set
+`CRONDELTA_ROBFIG_WORKER` to its path and run `uv run --no-sync pytest -q tests/test_robfig.py`.
 Verification installs dependencies for development; `crondelta compare` itself
 does not install anything. No jobs or SQL queries are executed.
 

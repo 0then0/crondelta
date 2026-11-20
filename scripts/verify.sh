@@ -21,6 +21,8 @@ with zipfile.ZipFile(f"dist/crondelta-{version}-py3-none-any.whl") as wheel:
     assert worker in wheel.namelist(), "wheel lacks the Node.js worker"
 with tarfile.open(f"dist/crondelta-{version}.tar.gz") as sdist:
     assert f"crondelta-{version}/src/{worker}" in sdist.getnames(), "sdist lacks the Node.js worker"
+    for source in ("go.mod", "go.sum", "main.go"):
+        assert f"crondelta-{version}/workers/robfig-cron/{source}" in sdist.getnames(), source
 PY
 uv venv --python "$runtime" "$scratch/installed"
 uv pip install --python "$scratch/installed/bin/python" "dist/crondelta-$version-py3-none-any.whl"
@@ -43,6 +45,16 @@ elif [ "${CRONDELTA_REQUIRE_NODE:-}" = 1 ]; then
   exit 1
 else
   echo "skipping the cron-parser lab: node and npm were not found" >&2
+fi
+if command -v go >/dev/null 2>&1; then
+  (
+    cd workers/robfig-cron
+    go test -mod=readonly ./...
+    go build -mod=readonly -o "$scratch/robfig-worker" .
+  )
+  export CRONDELTA_ROBFIG_WORKER="$scratch/robfig-worker"
+else
+  echo "skipping the robfig/cron integration tests: Go was not found" >&2
 fi
 CRONDELTA_INSTALLED_PYTHON="$scratch/installed/bin/python" \
 CRONDELTA_HISTORICAL_PYTHON="$scratch/historical/bin/python" \

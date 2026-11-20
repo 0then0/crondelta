@@ -23,8 +23,9 @@ window. The report has zero counts and `empty_window: true`.
 Each side accepts the following profile flags, replacing `left` with `right`
 for the other side:
 
-- `--left-engine`: `croniter`, `apscheduler`, or `cron-parser`; required. The JavaScript
-  engine has its own [profile flags](#comparing-cron-parser-installations).
+- `--left-engine`: `croniter`, `apscheduler`, `cron-parser`, or `robfig/cron`; required.
+  See the profile flags for [cron-parser](#comparing-cron-parser-installations) and
+  [robfig/cron](#comparing-with-robfigcron).
 - `--left-expression`: independent expression; falls back to `--expression`
   only when omitted. Expressions contain exactly five fields and at most
   1,024 characters.
@@ -117,9 +118,61 @@ cron-parser alone. The worker runs JavaScript from the selected installation: us
 executables and installations. Limits bound resources and are not a sandbox. The
 [upgrade case](cron-parser-upgrade.md) shows a complete example.
 
+## Comparing with robfig/cron
+
+Use `robfig/cron` to compare library-calculated CronJob dates during Kubernetes migration.
+Kubernetes v1.34.0 pins `github.com/robfig/cron/v3` at `v3.0.1`. Its controller adds
+`TZ=<key>` to a five-field expression with `.spec.timeZone` and calls `cron.ParseStandard`.
+[Pinned dependency](https://github.com/kubernetes/kubernetes/blob/v1.34.0/go.mod#L55),
+[controller parsing](https://github.com/kubernetes/kubernetes/blob/v1.34.0/pkg/controller/cronjob/cronjob_controllerv2.go#L499-L519),
+[timezone formatting](https://github.com/kubernetes/kubernetes/blob/v1.34.0/pkg/controller/cronjob/cronjob_controllerv2.go#L761-L778).
+
+Build the worker from the checkout once with Go 1.19 or newer, then pass its path to `compare`.
+
+```sh
+mkdir -p build
+(cd workers/robfig-cron && go build -mod=readonly -o ../../build/robfig-cron .)
+uv run --no-sync crondelta compare \
+  --left-engine apscheduler \
+  --right-engine robfig/cron --right-worker ./build/robfig-cron \
+  --expression '0 9 1 * MON' --timezone UTC \
+  --start 2026-06-01T09:00:00Z --end 2026-07-06T09:00:00Z
+```
+
+`robfig/cron` can run on either side, with a Python engine or a second `robfig/cron`
+profile. The `--right-worker` path may be absolute or relative to the working
+directory and must include a directory component. `--right-version` defaults to
+`v3.0.1`, the supported module version. A missing worker produces `ENGINE_ERROR`.
+The comparison runs the supplied executable directly, using the existing per-adapter
+limits. Building the worker and fetching its Go module are separate preparation steps.
+
+An optional `--right-tzif-path` and `--right-tzif-sha256` pair selects the TZif file
+for `--timezone`. Supply the file for that IANA key and its 64-character lowercase
+SHA-256. Reports record the digest of the bytes used for enumeration. To hold the zone
+data constant against a Python side, use the file from that side's pinned `tzdata` wheel.
+Without a file, Go resolves the explicit key through `time.LoadLocation` and may use host
+or bundled data. For this lookup the specific database and its digest are unavailable.
+The built-in `UTC` source is identifiable. Comparisons can proceed with unknown timezone
+provenance, which is shown explicitly in [report v4](protocol.md#report-v4-gorobfigcron).
+If both sides report TZif hashes and they differ, use `--allow-different-tzdata` to allow
+the comparison. `--right-tzdata-version`, `--right-python`, and engine options do not
+apply to `robfig/cron`.
+
+In a manifest, use profile keys `worker`, `version`, `tzif_path`, and `tzif_sha256` for
+the equivalent flags. Paths resolve from the working directory for CLI and manifest runs.
+The [example manifest](../examples/robfig-cron.json) exercises the day-of-month and
+day-of-week rule, DST transitions, and a UTC control. The
+[sample report](../examples/reports/robfig-cron.json) includes the preparation and verification
+commands.
+
+The result covers the dates returned by the library's parser and scheduler for the
+requested window. This profile covers five-field expressions and an explicit IANA key.
+It excludes descriptors such as `@every`, embedded `TZ` and `CRON_TZ`, interaction with
+a cluster, import of Kubernetes manifests, missed starts, and Job concurrency policy.
+
 ## Comparing timezone database versions
 
-By default, two sides that resolve different timezone data (a different `tzdata`
+By default, two Python sides that resolve different timezone data (a different `tzdata`
 version or different TZif bytes for the key) are `UNRESOLVED`; the reason names the
 flag below. To ask what changes when only the timezone database changes, prepare one
 interpreter per tzdata version, pin each side, and allow the comparison explicitly:
@@ -157,7 +210,7 @@ With permission, the existing algorithm compares the real UTC streams:
   timezone data. Interpreter paths and version pins are not counted as factors, and
   dependencies such as `python-dateutil` are not compared.
 
-The worker always builds the zone from the TZif bytes of the tzdata wheel that it
+The Python worker always builds the zone from the TZif bytes of the tzdata wheel that it
 hashes, not from the ZoneInfo cache, `PYTHONTZPATH`, the host's `TZ`, or a system
 database. `compare` never installs, creates environments, or downloads data.
 
@@ -168,10 +221,10 @@ or `+00:00`, with at most six fractional digits. Start is inclusive, end is
 exclusive, and start must precede end. Supported window years are 0002..9998.
 
 `--timezone` is an explicit IANA key such as `UTC`, `Europe/Berlin`, or
-`Australia/Lord_Howe`. Workers disable system timezone lookup and load the
-tzdata wheel. Unless different timezone data is explicitly allowed, both sides must
-resolve to the same tzdata version and TZif bytes. A missing wheel is an engine
-error; an unavailable timezone key is invalid input.
+`Australia/Lord_Howe`. Python workers disable system timezone lookup and load the
+tzdata wheel. A comparison between Python engines requires the same tzdata version
+and TZif bytes on both sides by default. A missing wheel is an engine error. An
+unavailable timezone key is invalid input by default.
 
 ## Manifests
 
@@ -206,8 +259,10 @@ including whitespace. Unknown keys are rejected.
 
 Run it with `crondelta compare --manifest path/to/manifest.json --format json`.
 `name`, `left`, `right`, `timezone`, `start`, and `end` are required per case.
-Profile keys are `engine`, `expression`, and optional `options`, `python`,
-`version`, `tzdata_version`. `limits` and the boolean `allow_different_tzdata`
+Python profile keys are `engine`, `expression`, and optional `options`, `python`,
+`version`, `tzdata_version`. See the [cron-parser](#comparing-cron-parser-installations)
+and [robfig/cron](#comparing-with-robfigcron) sections for their profile keys.
+`limits` and the boolean `allow_different_tzdata`
 (default `false`) are optional per case. Manifests written for 0.1 remain valid. Case names contain 1..256 characters.
 The entire manifest is validated before any engine starts. All valid cases
 run in order. Manifest mode accepts `--format` but cannot be combined with

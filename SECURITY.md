@@ -23,12 +23,12 @@ differences, use the [issue tracker](https://github.com/0then0/crondelta/issues)
 
 ## Trust boundaries
 
-CronDelta invokes the Python executables selected by a profile and imports their
-installed libraries. Those executables and packages must be trusted. A manifest
-can select an interpreter, so review manifests obtained from other people before
-running them.
+CronDelta runs the executables and loads the engine installations selected by
+profiles. A manifest can select an interpreter, Node.js installation, or Go worker
+executable. Review manifests obtained from other people and use trusted executables
+and libraries.
 
-Worker isolation and resource limits bound schedule enumeration; they do not
-sandbox arbitrary Python code. CronDelta does not execute scheduled jobs or SQL.
+Worker processes run with the invoking user's permissions. Resource limits bound
+schedule enumeration. CronDelta does not execute scheduled jobs or SQL.
 Published evidence can include local interpreter paths and diagnostics; inspect
 it for private information before sharing it.

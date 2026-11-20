@@ -7,7 +7,7 @@ from pathlib import Path
 
 from . import __version__
 from .comparison import EXIT_CODES, compare, input_report
-from .config import ENGINES, Case, InvalidInput, UnsupportedScope, keys
+from .config import ENGINES, GO_PROFILE_KEYS, Case, InvalidInput, UnsupportedScope, keys
 from .reports import human
 
 
@@ -34,6 +34,13 @@ def parser() -> argparse.ArgumentParser:
         command.add_argument(
             f"--{side}-installation",
             help="cron-parser: directory containing node_modules/cron-parser (never installed)",
+        )
+        command.add_argument(
+            f"--{side}-worker", help="robfig/cron: explicit path to a built worker"
+        )
+        command.add_argument(f"--{side}-tzif-path", help="robfig/cron: path to pinned TZif data")
+        command.add_argument(
+            f"--{side}-tzif-sha256", help="robfig/cron: required TZif SHA-256 hash"
         )
         command.add_argument(f"--{side}-version", help="exact required installed engine version")
         command.add_argument(
@@ -101,6 +108,7 @@ def load_cases(args) -> list[Case]:
             "installation",
             "version",
             "tzdata_version",
+            *GO_PROFILE_KEYS,
         ):
             value = getattr(args, f"{side}_{key}")
             if key == "expression" and value is None:

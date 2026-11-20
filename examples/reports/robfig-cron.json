@@ -1,0 +1,110 @@
+{
+  "report_schema_version": 4,
+  "commands": [
+    "lab=$(mktemp -d)",
+    "uv run --no-sync python examples/robfig-cron-lab/check.py prepare --workdir \"$lab\"",
+    "(cd workers/robfig-cron && go build -mod=readonly -o \"$lab/robfig-worker\" .)",
+    "(cd workers/robfig-cron && go build -mod=readonly -o \"$lab/robfig-direct\" ../../examples/robfig-cron-lab/direct.go)",
+    "uv run --no-sync crondelta compare --manifest \"$lab/manifest.json\" --format json > \"$lab/report.json\"  # exit 1",
+    "uv run --no-sync python examples/robfig-cron-lab/check.py verify --workdir \"$lab\" \"$lab/report.json\""
+  ],
+  "comparison_exit_code": 1,
+  "outcome": "DIFFERENT",
+  "versions": {
+    "APScheduler": "3.11.3",
+    "Python": "3.13.18",
+    "tzdata": "2026.2",
+    "robfig/cron": "v3.0.1",
+    "Go": "go1.27.4"
+  },
+  "robfig_cron_module_sum": "h1:WdRxkvbJztn8LMz/QEvLN5sBU+xKpSqwwUO1Pjr4qDs=",
+  "tzif_sources": {
+    "APScheduler": "tzdata.zoneinfo",
+    "robfig/cron": "Go time.LoadLocationFromTZData"
+  },
+  "direct_library_checks": "Both public APIs reproduced the complete UTC streams.",
+  "cases": [
+    {
+      "name": "weekday_monthday",
+      "expression": "0 9 1 * MON",
+      "timezone": "UTC",
+      "start": "2026-06-01T09:00:00Z",
+      "end": "2026-07-06T09:00:00Z",
+      "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+      "outcome": "DIFFERENT",
+      "window_checked": true,
+      "apscheduler_utc": [
+        "2026-06-01T09:00:00Z"
+      ],
+      "robfig_cron_utc": [
+        "2026-06-01T09:00:00Z",
+        "2026-06-08T09:00:00Z",
+        "2026-06-15T09:00:00Z",
+        "2026-06-22T09:00:00Z",
+        "2026-06-29T09:00:00Z",
+        "2026-07-01T09:00:00Z"
+      ]
+    },
+    {
+      "name": "berlin_spring_gap",
+      "expression": "30 2 * * *",
+      "timezone": "Europe/Berlin",
+      "start": "2026-03-28T00:00:00Z",
+      "end": "2026-03-31T00:00:00Z",
+      "tzif_sha256": "a7fd9932d785d4d690900b834c3563c1810c1cf2e01711bcc0926af6c0767cb7",
+      "outcome": "DIFFERENT",
+      "window_checked": true,
+      "apscheduler_utc": [
+        "2026-03-28T01:30:00Z",
+        "2026-03-29T01:30:00Z",
+        "2026-03-30T00:30:00Z"
+      ],
+      "robfig_cron_utc": [
+        "2026-03-28T01:30:00Z",
+        "2026-03-30T00:30:00Z"
+      ]
+    },
+    {
+      "name": "berlin_autumn_fold",
+      "expression": "30 2 * * *",
+      "timezone": "Europe/Berlin",
+      "start": "2026-10-24T00:00:00Z",
+      "end": "2026-10-27T00:00:00Z",
+      "tzif_sha256": "a7fd9932d785d4d690900b834c3563c1810c1cf2e01711bcc0926af6c0767cb7",
+      "outcome": "MATCH_WITHIN_WINDOW",
+      "window_checked": true,
+      "apscheduler_utc": [
+        "2026-10-24T00:30:00Z",
+        "2026-10-25T00:30:00Z",
+        "2026-10-25T01:30:00Z",
+        "2026-10-26T01:30:00Z"
+      ],
+      "robfig_cron_utc": [
+        "2026-10-24T00:30:00Z",
+        "2026-10-25T00:30:00Z",
+        "2026-10-25T01:30:00Z",
+        "2026-10-26T01:30:00Z"
+      ]
+    },
+    {
+      "name": "utc_control",
+      "expression": "30 2 * * *",
+      "timezone": "UTC",
+      "start": "2026-03-28T00:00:00Z",
+      "end": "2026-03-31T00:00:00Z",
+      "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93",
+      "outcome": "MATCH_WITHIN_WINDOW",
+      "window_checked": true,
+      "apscheduler_utc": [
+        "2026-03-28T02:30:00Z",
+        "2026-03-29T02:30:00Z",
+        "2026-03-30T02:30:00Z"
+      ],
+      "robfig_cron_utc": [
+        "2026-03-28T02:30:00Z",
+        "2026-03-29T02:30:00Z",
+        "2026-03-30T02:30:00Z"
+      ]
+    }
+  ]
+}

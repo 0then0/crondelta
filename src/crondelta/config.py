@@ -1,6 +1,7 @@
 """Input validation, independent of installed engine implementations."""
 
 import math
+import os
 import re
 import sys
 from dataclasses import asdict, dataclass, field, replace
@@ -45,7 +46,10 @@ def keys(data: dict, allowed: set[str], label: str) -> None:
 
 PYTHON_ENGINES = ("croniter", "apscheduler")
 NODE_ENGINE = "cron-parser"
-ENGINES = (*PYTHON_ENGINES, NODE_ENGINE)
+GO_ENGINE = "robfig/cron"
+GO_ENGINE_VERSION = "v3.0.1"
+ENGINES = (*PYTHON_ENGINES, NODE_ENGINE, GO_ENGINE)
+GO_PROFILE_KEYS = ("worker", "tzif_path", "tzif_sha256")
 
 
 @dataclass(frozen=True)
@@ -59,16 +63,22 @@ class Profile:
     # Node.js profiles only. `node` is the case-level executable shared by both sides.
     installation: str | None = None
     node: str | None = None
+    worker: str | None = None
+    tzif_path: str | None = None
+    tzif_sha256: str | None = None
 
     @property
     def is_node(self) -> bool:
         return self.engine == NODE_ENGINE
 
+    @property
+    def is_go(self) -> bool:
+        return self.engine == GO_ENGINE
+
     def to_dict(self) -> dict:
         """The requested profile as protocol and report data.
 
-        Python profiles keep exactly their pre-Node fields, so existing reports and the
-        worker protocol are unchanged.
+        Each adapter retains its own request and report fields.
         """
         if self.is_node:
             return {
@@ -78,6 +88,11 @@ class Profile:
                 "installation": self.installation,
                 "node": self.node,
                 "version": self.version,
+            }
+        if self.is_go:
+            return {
+                key: getattr(self, key)
+                for key in ("engine", "expression", "options", "version", *GO_PROFILE_KEYS)
             }
         return {
             key: getattr(self, key)
@@ -98,6 +113,7 @@ class Profile:
                 "version",
                 "tzdata_version",
                 "installation",
+                *GO_PROFILE_KEYS,
             },
             "profile",
         )
@@ -106,12 +122,20 @@ class Profile:
             raise InvalidInput("profile engine must be a nonempty string")
         if engine not in ENGINES:
             raise UnsupportedScope(
-                "supported engines: croniter, apscheduler (3.x), cron-parser (5.x)"
+                "supported engines: croniter, apscheduler (3.x), cron-parser (5.x), robfig/cron"
             )
         expression = data.get("expression")
         if not isinstance(expression, str) or len(expression) > 1024:
             raise InvalidInput("expression must be a string of at most 1024 characters")
-        if len(expression.split()) != 5:
+        fields = expression.split()
+        if engine == GO_ENGINE and (
+            expression.lstrip().startswith("@")
+            or any(part.startswith(("TZ=", "CRON_TZ=")) for part in fields)
+        ):
+            raise UnsupportedScope(
+                "robfig/cron requires five fields without a descriptor or TZ prefix"
+            )
+        if len(fields) != 5:
             raise InvalidInput("exactly five cron fields are required")
         # Nondeterministic/hash-dependent schedules have no reproducible v0.1 profile.
         if re.search(r"\b[HR](?:\b|\()", expression, re.IGNORECASE):
@@ -119,6 +143,11 @@ class Profile:
         options = data.get("options", {})
         if not isinstance(options, dict):
             raise InvalidInput("options must be an object")
+        if engine == GO_ENGINE:
+            return cls._parse_go(data, expression, options)
+        for key in GO_PROFILE_KEYS:
+            if key in data:
+                raise InvalidInput(f"{key} applies only to robfig/cron profiles")
         if engine == NODE_ENGINE:
             return cls._parse_node(data, expression, options)
         if data.get("installation") is not None:
@@ -170,6 +199,45 @@ class Profile:
         return cls(
             NODE_ENGINE, expression, {}, python="", version=version, installation=installation
         )
+
+    @classmethod
+    def _parse_go(cls, data: dict, expression: str, options: dict) -> "Profile":
+        for key in ("python", "tzdata_version", "installation"):
+            if key in data:
+                raise InvalidInput(f"{key} does not apply to robfig/cron profiles")
+        if options:
+            raise UnsupportedScope(f"unsupported {GO_ENGINE} options: {sorted(options)}")
+        version = data.get("version", GO_ENGINE_VERSION)
+        if version != GO_ENGINE_VERSION:
+            raise UnsupportedScope(f"robfig/cron profiles require version {GO_ENGINE_VERSION}")
+        worker, path, digest = (data.get(key) for key in GO_PROFILE_KEYS)
+        if not path_string(worker) or not os.path.dirname(worker):
+            raise InvalidInput(
+                "robfig/cron profiles require an explicit worker path (e.g. ./worker)"
+            )
+        if path is not None or digest is not None:
+            if (
+                not path_string(path)
+                or not isinstance(digest, str)
+                or not re.fullmatch(r"[0-9a-f]{64}", digest)
+            ):
+                raise InvalidInput(
+                    "tzif_path requires a matching lowercase tzif_sha256, and vice versa"
+                )
+        return cls(
+            GO_ENGINE,
+            expression,
+            {},
+            python="",
+            version=version,
+            worker=worker,
+            tzif_path=path,
+            tzif_sha256=digest,
+        )
+
+
+def path_string(value) -> bool:
+    return isinstance(value, str) and 0 < len(value) <= 4096 and "\x00" not in value
 
 
 @dataclass(frozen=True)

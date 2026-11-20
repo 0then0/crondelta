@@ -4,7 +4,7 @@ import json
 from dataclasses import asdict
 
 from .adapters import Stream, run_adapter
-from .config import NODE_ENGINE, Case, iso, utc_datetime
+from .config import GO_ENGINE, NODE_ENGINE, Case, iso, utc_datetime
 
 EXIT_CODES = {
     "MATCH_WITHIN_WINDOW": 0,
@@ -21,6 +21,10 @@ ALLOW_HINT = "pass --allow-different-tzdata (manifest: allow_different_tzdata) t
 
 def is_node(stream: Stream) -> bool:
     return bool(stream.profile) and stream.profile["engine"] == NODE_ENGINE
+
+
+def is_go(stream: Stream) -> bool:
+    return bool(stream.profile) and stream.profile["engine"] == GO_ENGINE
 
 
 def runtime_identity(profile: dict) -> tuple:
@@ -48,7 +52,11 @@ def tzdata_identity(stream: Stream) -> tuple | None:
 
 def tzdata_differs(left: Stream, right: Stream) -> bool | None:
     a, b = tzdata_identity(left), tzdata_identity(right)
-    return None if a is None or b is None else a != b
+    if a is None or b is None:
+        return None
+    if is_go(left) or is_go(right):
+        return a[1] != b[1] if a[1] is not None and b[1] is not None else None
+    return a != b
 
 
 def describe_runtime_difference(left: Stream, right: Stream) -> str:
@@ -63,6 +71,8 @@ def describe_runtime_difference(left: Stream, right: Stream) -> str:
 
 
 def describe_tzdata_difference(left: Stream, right: Stream) -> str:
+    if is_go(left) or is_go(right):
+        return "TZif SHA-256 differs"
     (lv, lh), (rv, rh) = tzdata_identity(left), tzdata_identity(right)
     hashes = "equal" if lh == rh else "different"
     return f"left tzdata {lv}, right tzdata {rv}; TZif SHA-256 {hashes}"
@@ -74,13 +84,25 @@ def unresolved_detail(left: Stream, right: Stream) -> str:
         if stream.status == "version_mismatch":
             notes.append(f"{side}: requested engine version is not installed")
         elif stream.status == "tzdata_mismatch":
-            tz = stream.profile["timezone"]
-            notes.append(
-                f"{side}: requested tzdata {tz['requested_tzdata_version']}, "
-                f"installed {tz['tzdata_version']}"
-            )
+            profile = stream.profile
+            tz = profile["timezone"]
+            if is_go(stream):
+                notes.append(
+                    f"{side}: requested TZif SHA-256 {profile['tzif_sha256']}, "
+                    f"read {tz['tzif_sha256']}"
+                )
+            else:
+                notes.append(
+                    f"{side}: requested tzdata {tz['requested_tzdata_version']}, "
+                    f"installed {tz['tzdata_version']}"
+                )
         elif stream.status == "unsupported":
-            notes.append(f"{side}: unsupported engine version")
+            detail = (
+                (stream.detail or "unsupported robfig/cron profile")
+                if is_go(stream)
+                else ("unsupported engine version")
+            )
+            notes.append(f"{side}: {detail}")
     return "requested engine profile cannot be resolved (" + "; ".join(notes) + ")"
 
 
@@ -188,11 +210,12 @@ def timezone_data(case: Case, left: Stream, right: Stream) -> dict:
             "tzif_equal": None,
             "runtime_equal": None if differs is None else not differs,
         }
+    go_case = case.left.is_go or case.right.is_go
     return {
         "different_tzdata_allowed": case.allow_different_tzdata,
         "status": "unresolved" if differs is None else "different" if differs else "identical",
-        "versions_equal": identity[0][0] == identity[1][0] if known else None,
-        "tzif_equal": identity[0][1] == identity[1][1] if known else None,
+        "versions_equal": identity[0][0] == identity[1][0] if known and not go_case else None,
+        "tzif_equal": identity[0][1] == identity[1][1] if differs is not None else None,
     }
 
 
@@ -244,7 +267,8 @@ def profile_differences(case: Case, left: Stream, right: Stream) -> dict:
         if a["runtime"] != b["runtime"]:
             provenance.append("runtime")
         for name in ("tzdata_version", "tzif_sha256"):
-            if a["timezone"][name] != b["timezone"][name]:
+            x, y = a["timezone"][name], b["timezone"][name]
+            if x is not None and y is not None and x != y:
                 provenance.append(name)
     if configuration:
         timezone_data_only = False
@@ -265,6 +289,13 @@ def report(case: Case, left: Stream, right: Stream) -> dict:
     )
     index = witness.get("index", 0) if witness else 0
     radius = case.limits.context
+    schema_version = 1
+    if case.left.is_go or case.right.is_go:
+        schema_version = 4
+    elif case.left.is_node:
+        schema_version = 3
+    elif case.allow_different_tzdata:
+        schema_version = 2
 
     def context(stream):
         low = max(0, index - radius)
@@ -272,9 +303,7 @@ def report(case: Case, left: Stream, right: Stream) -> dict:
         return [{"index": i, **event} for i, event in enumerate(stream.events[low:high], low)]
 
     return {
-        # Version 2 reports can pair MATCH_WITHIN_WINDOW/DIFFERENT with different tz data.
-        # Version 3: Node.js runs, whose timezone data identity is the ICU runtime.
-        "schema_version": 3 if case.left.is_node else 2 if case.allow_different_tzdata else 1,
+        "schema_version": schema_version,
         "name": case.name,
         "outcome": outcome,
         "reason": reason,

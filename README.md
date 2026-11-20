@@ -10,8 +10,8 @@
 **Compare actual cron engines before changing the library behind your schedules.**
 
 Changing a cron library, its version, or its options can change when a schedule
-fires. CronDelta calls two installed Python engines, or two installations of the
-JavaScript `cron-parser`, and compares their UTC occurrences in a finite window. It reports the first proven difference, the
+fires. CronDelta compares UTC occurrences from installed Python engines, two
+`cron-parser` installations, or a prebuilt Go worker for `robfig/cron`. It reports the first proven difference, the
 versions and timezone data used, and whether the window was fully checked. It can
 also show which UTC occurrences change when only the timezone database changes.
 
@@ -66,8 +66,8 @@ executes jobs, or connects to a database.
 
 ## Supported comparisons
 
-- **Engines:** croniter and APScheduler 3.x `CronTrigger`, using their public APIs, and two
-  installations of `cron-parser` 5.x (see below).
+- **Engines:** croniter, APScheduler 3.x `CronTrigger`, `robfig/cron` v3.0.1, and two
+  installations of `cron-parser` 5.x. Each adapter uses the engine's public API.
   The locked baseline is croniter **6.2.4**, APScheduler **3.11.3**, and tzdata
   **2026.2**. Historical UTC controls cover croniter **6.0.0** and APScheduler
   **3.11.2**. Other installed versions can be requested explicitly.
@@ -78,7 +78,7 @@ executes jobs, or connects to a database.
 - **Expressions:** five fields: minute, hour, day-of-month, month, day-of-week.
   Six/seven fields, aliases, random/hash fields, and APScheduler 4.x are outside
   the supported scope. Each engine parses its own expression.
-- **Timezones:** an explicit IANA key, with both engines forced to use the
+- **Timezones:** an explicit IANA key. Python engines use the
   tzdata wheel. Reports record the requested and resolved tzdata version and the
   SHA-256 of the exact TZif file used. Sides with different timezone data are
   `UNRESOLVED` unless the comparison is explicitly allowed with
@@ -90,6 +90,9 @@ executes jobs, or connects to a database.
   Reports (schema version 3) record the loaded cron-parser and Luxon versions and the
   Node.js, ICU, and timezone data versions; Node.js has no tzdata package or TZif file.
   See the [cron-parser upgrade case](https://github.com/0then0/crondelta/blob/main/docs/cron-parser-upgrade.md).
+- **robfig/cron:** compare the Kubernetes CronJob schedule calculation with APScheduler or
+  another Python profile. Supply the compiled worker by path. Report schema 4 records
+  the loaded module and Go runtime, the IANA key, and timezone provenance where available.
 - **Evidence:** exact UTC datetimes, original local time, offset, fold, and UTC
   round-trip. Deadlines and output/occurrence limits bound enumeration. An
   incomplete calculation cannot produce `MATCH_WITHIN_WINDOW`.
@@ -97,6 +100,54 @@ executes jobs, or connects to a database.
 CronDelta checks trigger calculations. Scheduler execution policies such as
 misfires, coalescing, jitter, and catch-up are outside its scope. It does not
 convert expressions or repair migrations automatically.
+
+## Kubernetes CronJob schedule comparison
+
+The worker uses `ParseStandard` and `Schedule.Next` from `robfig/cron/v3` **v3.0.1**.
+Kubernetes **v1.34.0** pins that dependency and passes a valid `.spec.timeZone` to
+`ParseStandard` as `TZ=<IANA key>` before the five cron fields. The result covers
+dates calculated by the library. Cluster access, manifest import, descriptors such as
+`@every`, expression-level `TZ` and `CRON_TZ`, missed runs, and Job concurrency policies
+are outside this comparison. [Kubernetes dependency](https://github.com/kubernetes/kubernetes/blob/v1.34.0/go.mod#L55),
+[CronJob controller](https://github.com/kubernetes/kubernetes/blob/v1.34.0/pkg/controller/cronjob/cronjob_controllerv2.go#L499-L519),
+[time zone handling](https://github.com/kubernetes/kubernetes/blob/v1.34.0/pkg/controller/cronjob/cronjob_controllerv2.go#L761-L778),
+[robfig/cron v3.0.1 scheduler](https://github.com/robfig/cron/blob/v3.0.1/spec.go#L56-L93).
+
+From the checkout, with the locked Python environment and Go 1.19 or later:
+
+```sh
+lab=$(mktemp -d)
+uv run --no-sync python examples/robfig-cron-lab/check.py prepare --workdir "$lab"
+(cd workers/robfig-cron && go build -mod=readonly -o "$lab/robfig-worker" .)
+uv run --no-sync crondelta compare \
+  --left-engine apscheduler --right-engine robfig/cron --right-worker "$lab/robfig-worker" \
+  --expression '0 9 1 * MON' --timezone UTC \
+  --start 2026-06-01T09:00:00Z --end 2026-07-06T09:00:00Z
+```
+
+Both engines include June 1 at 09:00 UTC. `robfig/cron` also includes June 8, 15,
+22, 29, and July 1 at 09:00 UTC because it uses OR for restricted day-of-month and
+day-of-week fields. APScheduler requires both fields to match. The command exits 1
+for `DIFFERENT`.
+
+The prepared manifest repeats that check and compares `30 2 * * *` around both DST
+transitions in `Europe/Berlin`, with a UTC control. It pins each zone's TZif bytes
+from `tzdata==2026.2` by SHA-256. `robfig/cron` skips March 29 at 02:30 local.
+APScheduler emits 01:30 UTC, which converts back to 03:30 local. Both engines return
+00:30 and 01:30 UTC for the repeated 02:30 on October 25, and the UTC control matches.
+
+```sh
+(cd workers/robfig-cron && go build -mod=readonly -o "$lab/robfig-direct" \
+  ../../examples/robfig-cron-lab/direct.go)
+uv run --no-sync crondelta compare --manifest "$lab/manifest.json" --format json \
+  > "$lab/report.json"  # exit 1
+uv run --no-sync python examples/robfig-cron-lab/check.py verify --workdir "$lab" "$lab/report.json"
+```
+
+`compare` starts the supplied binary without building it or downloading modules.
+Without a TZif pin, Go resolves the zone normally and the report marks unavailable
+source and hash metadata. The saved example includes the complete UTC streams and
+reproduction commands. [Example report](examples/reports/robfig-cron.json).
 
 ## Documentation
 

@@ -12,10 +12,13 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 
-from .config import Case, Profile, utc_datetime
+from .config import GO_ENGINE_VERSION, Case, Profile, utc_datetime
 
 PYTHON_WORKER = Path(__file__).with_name("_worker.py")
 NODE_WORKER = Path(__file__).with_name("_node_worker.cjs")
+GO_MODULE = "github.com/robfig/cron/v3"
+# The pinned archive checksum in workers/robfig-cron/go.sum.
+GO_MODULE_SUM = "h1:WdRxkvbJztn8LMz/QEvLN5sBU+xKpSqwwUO1Pjr4qDs="
 
 STATUSES = {
     "complete",
@@ -66,6 +69,10 @@ def requested_mismatch(profile: dict, requested: Profile) -> str | None:
     """Terminal status that a worker must report when it cannot honor the requested pins."""
     if requested.version is not None and profile["actual_version"] != requested.version:
         return "version_mismatch"
+    if requested.tzif_sha256 is not None and (
+        profile["timezone"]["tzif_sha256"] != requested.tzif_sha256
+    ):
+        return "tzdata_mismatch"
     if (
         requested.tzdata_version is not None
         and profile["timezone"]["tzdata_version"] != requested.tzdata_version
@@ -134,6 +141,57 @@ def validate_node_provenance(profile: dict, case: Case) -> None:
         raise ValueError("unavailable timezone provenance must be listed explicitly")
 
 
+def validate_go_provenance(profile: dict, case: Case, requested: Profile) -> None:
+    runtime = profile["runtime"]
+    if (
+        runtime["implementation"] != "Go"
+        or not all(nonempty_str(runtime.get(k)) for k in ("platform", "arch", "executable"))
+        or runtime.get("executable_realpath") != os.path.realpath(requested.worker)
+        or profile["interpreter"] != runtime["executable"]
+    ):
+        raise ValueError("invalid Go runtime provenance")
+    loaded = profile.get("loaded")
+    module = loaded.get(GO_MODULE) if isinstance(loaded, dict) else None
+    if (
+        profile.get("requested_version") != requested.version
+        or not isinstance(module, dict)
+        or set(loaded) != {GO_MODULE}
+        or module.get("version") != profile["actual_version"]
+        or not nonempty_str(module.get("sum"))
+        or not re.fullmatch(r"h1:[A-Za-z0-9+/]{43}=", module["sum"])
+        or (profile["actual_version"] == GO_ENGINE_VERSION and module["sum"] != GO_MODULE_SUM)
+    ):
+        raise ValueError("invalid loaded robfig/cron module provenance")
+    tz = profile.get("timezone")
+    if (
+        not isinstance(tz, dict)
+        or tz.get("provider") != "go"
+        or tz.get("key") != case.timezone
+        or not {"source", "tzdata_version", "tzif_sha256"} <= tz.keys()
+        or tz["tzdata_version"] is not None
+    ):
+        raise ValueError("invalid Go timezone provenance")
+    if requested.tzif_path is not None:
+        if (
+            tz["source"] != "Go time.LoadLocationFromTZData"
+            or not isinstance(tz["tzif_sha256"], str)
+            or not re.fullmatch(r"[0-9a-f]{64}", tz["tzif_sha256"])
+        ):
+            raise ValueError("pinned TZif provenance is missing or invalid")
+    elif tz["tzif_sha256"] is not None or tz["source"] != (
+        "Go time.UTC" if case.timezone == "UTC" else None
+    ):
+        raise ValueError("invalid provenance for Go's default timezone data")
+    unavailable = [k for k in ("source", "tzdata_version", "tzif_sha256") if tz[k] is None]
+    reported = tz.get("unavailable")
+    if (
+        not isinstance(reported, list)
+        or not all(isinstance(key, str) for key in reported)
+        or sorted(reported) != sorted(unavailable)
+    ):
+        raise ValueError("unavailable Go timezone provenance must be listed explicitly")
+
+
 def consume(stream: Stream, message: dict, case: Case, requested: Profile) -> None:
     if (
         not isinstance(message, dict)
@@ -164,6 +222,8 @@ def consume(stream: Stream, message: dict, case: Case, requested: Profile) -> No
         tz = profile.get("timezone")
         if requested.is_node:
             validate_node_provenance(profile, case)
+        elif requested.is_go:
+            validate_go_provenance(profile, case, requested)
         elif (
             not isinstance(tz, dict)
             or tz.get("provider") != "tzdata"
@@ -251,16 +311,18 @@ def consume(stream: Stream, message: dict, case: Case, requested: Profile) -> No
 
 
 def run_adapter(case: Case, profile: Profile, *, command: list[str] | None = None) -> Stream:
-    """The command override is for transport tests, never exposed as a CLI plugin API."""
+    """Use the selected worker under the same transport limits as built-in adapters."""
     stream = Stream(status="running")
     env = None
     if command is None and profile.is_node:
         command = [profile.node, str(NODE_WORKER)]
         # Options and search paths must not change which library or ICU data is loaded.
         env = {k: v for k, v in os.environ.items() if k not in ("NODE_OPTIONS", "NODE_PATH")}
-    command = command or [profile.python, "-I", str(PYTHON_WORKER)]
     started = time.monotonic()
     try:
+        if command is None and profile.is_go:
+            command = [os.path.realpath(profile.worker, strict=True)]
+        command = command or [profile.python, "-I", str(PYTHON_WORKER)]
         child = subprocess.Popen(
             command,
             stdin=subprocess.PIPE,

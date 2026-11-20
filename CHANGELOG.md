@@ -5,6 +5,18 @@ are not part of a published package.
 
 ## [Unreleased]
 
+### Added
+
+- A prebuilt Go worker for `robfig/cron/v3` v3.0.1 schedule comparisons with
+  APScheduler and other Python profiles. The adapter follows the five-field
+  parser and `.spec.timeZone` handling checked against Kubernetes v1.34.0.
+  CLI and manifest profiles accept an explicit worker path and optional SHA-256
+  pinned TZif data. The worker distinguishes a confirmed window end, exhausted
+  search horizon, occurrence cap, and execution failure.
+- Report schema 4 records the resolved Go runtime, module checksum, and available
+  timezone provenance. A reproducible lab compares weekday/monthday rules, both
+  Berlin DST transitions, and a UTC control with independent library calls.
+
 ## [0.3.0] - 2026-11-07
 
 ### Added

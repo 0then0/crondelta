@@ -1,5 +1,7 @@
 """Human report rendering; JSON is the versioned report dictionary."""
 
+from .config import GO_ENGINE
+
 
 def node_lines(report: dict) -> list[str]:
     data, differences = report["timezone_data"], report["profile_differences"]
@@ -34,12 +36,14 @@ def tzdata_lines(report: dict) -> list[str]:
     allowed = "explicitly allowed" if data["different_tzdata_allowed"] else "not allowed"
     status = data["status"]
     if status == "different":
-        versions = "equal" if data["versions_equal"] else "different"
         hashes = "equal" if data["tzif_equal"] else "different"
+        versions = {True: "equal", False: "different", None: "unavailable"}[data["versions_equal"]]
         lines = [
             f"Timezone data: different, comparison {allowed}; tzdata versions {versions}, "
             f"TZif SHA-256 {hashes}"
         ]
+    elif report["schema_version"] == 4 and status == "unresolved":
+        lines = ["Timezone data: TZif equality unavailable"]
     else:
         lines = [f"Timezone data: {status}"]
     configuration = differences["configuration"]
@@ -88,7 +92,14 @@ def human(report: dict) -> str:
             f"{side}: {requested['engine']} {version}, {requested['expression']!r}, "
             f"occurrences={count}, {summary['termination_reason']}"
         )
-        if resolved and "loaded" in resolved:
+        if resolved and requested["engine"] == GO_ENGINE:
+            tz = resolved["timezone"]
+            lines.append(
+                f"  {resolved['runtime']['version']}; "
+                f"timezone source {tz['source'] or 'unavailable'}; "
+                f"TZif SHA-256 {tz['tzif_sha256'] or 'unavailable'}"
+            )
+        elif resolved and "loaded" in resolved:
             tz = resolved["timezone"]
             lines.append(
                 f"  Node.js {resolved['runtime']['version']}; "

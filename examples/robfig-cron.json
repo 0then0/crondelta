@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "weekday_monthday",
+      "left": {
+        "engine": "apscheduler",
+        "expression": "0 9 1 * MON",
+        "version": "3.11.3",
+        "tzdata_version": "2026.2"
+      },
+      "right": {
+        "engine": "robfig/cron",
+        "expression": "0 9 1 * MON",
+        "version": "v3.0.1",
+        "worker": "<lab>/robfig-worker",
+        "tzif_path": "<lab>/UTC.tzif",
+        "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93"
+      },
+      "timezone": "UTC",
+      "start": "2026-06-01T09:00:00Z",
+      "end": "2026-07-06T09:00:00Z",
+      "limits": {"context": 6}
+    },
+    {
+      "name": "berlin_spring_gap",
+      "left": {
+        "engine": "apscheduler",
+        "expression": "30 2 * * *",
+        "version": "3.11.3",
+        "tzdata_version": "2026.2"
+      },
+      "right": {
+        "engine": "robfig/cron",
+        "expression": "30 2 * * *",
+        "version": "v3.0.1",
+        "worker": "<lab>/robfig-worker",
+        "tzif_path": "<lab>/Europe-Berlin.tzif",
+        "tzif_sha256": "a7fd9932d785d4d690900b834c3563c1810c1cf2e01711bcc0926af6c0767cb7"
+      },
+      "timezone": "Europe/Berlin",
+      "start": "2026-03-28T00:00:00Z",
+      "end": "2026-03-31T00:00:00Z",
+      "limits": {"context": 6}
+    },
+    {
+      "name": "berlin_autumn_fold",
+      "left": {
+        "engine": "apscheduler",
+        "expression": "30 2 * * *",
+        "version": "3.11.3",
+        "tzdata_version": "2026.2"
+      },
+      "right": {
+        "engine": "robfig/cron",
+        "expression": "30 2 * * *",
+        "version": "v3.0.1",
+        "worker": "<lab>/robfig-worker",
+        "tzif_path": "<lab>/Europe-Berlin.tzif",
+        "tzif_sha256": "a7fd9932d785d4d690900b834c3563c1810c1cf2e01711bcc0926af6c0767cb7"
+      },
+      "timezone": "Europe/Berlin",
+      "start": "2026-10-24T00:00:00Z",
+      "end": "2026-10-27T00:00:00Z",
+      "limits": {"context": 6}
+    },
+    {
+      "name": "utc_control",
+      "left": {
+        "engine": "apscheduler",
+        "expression": "30 2 * * *",
+        "version": "3.11.3",
+        "tzdata_version": "2026.2"
+      },
+      "right": {
+        "engine": "robfig/cron",
+        "expression": "30 2 * * *",
+        "version": "v3.0.1",
+        "worker": "<lab>/robfig-worker",
+        "tzif_path": "<lab>/UTC.tzif",
+        "tzif_sha256": "fddce1e648a1732ac29afd9a16151b2973cdf082e7ec0c690f7e42be6b598b93"
+      },
+      "timezone": "UTC",
+      "start": "2026-03-28T00:00:00Z",
+      "end": "2026-03-31T00:00:00Z",
+      "limits": {"context": 6}
+    }
+  ]
+}
