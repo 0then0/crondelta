@@ -10,7 +10,7 @@ spec.loader.exec_module(release)
 
 
 def test_current_release_metadata():
-    assert release.check_release(ROOT, "v0.3.0") == "0.3.0"
+    assert release.check_release(ROOT, "v0.4.0") == "0.4.0"
 
 
 @pytest.mark.parametrize("tag", ["0.3.0", "v0.2.0", "v0.3.0-extra", ""])

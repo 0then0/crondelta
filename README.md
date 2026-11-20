@@ -22,7 +22,7 @@ from PyPI. If the release is not yet available there, use the source installatio
 below.
 
 ```sh
-uv tool install crondelta==0.3.0
+uv tool install crondelta==0.4.0
 crondelta compare \
   --left-engine croniter --left-version 6.2.4 \
   --right-engine apscheduler --right-version 3.11.3 \
@@ -56,7 +56,7 @@ the repository. To build and install from source instead:
 git clone https://github.com/0then0/crondelta.git
 cd crondelta
 uv build
-uv tool install ./dist/crondelta-0.3.0-py3-none-any.whl
+uv tool install ./dist/crondelta-0.4.0-py3-none-any.whl
 crondelta --version
 ```
 

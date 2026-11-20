@@ -5,6 +5,8 @@ are not part of a published package.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-20
+
 ### Added
 
 - A prebuilt Go worker for `robfig/cron/v3` v3.0.1 schedule comparisons with
@@ -92,7 +94,8 @@ are not part of a published package.
 - Controlled query-exporter migration examples and installed-package checks.
 - Python 3.11/3.13/3.14 CI and a PyPI Trusted Publishing workflow.
 
-[Unreleased]: https://github.com/0then0/crondelta/compare/v0.3.0...main
+[Unreleased]: https://github.com/0then0/crondelta/compare/v0.4.0...main
+[0.4.0]: https://github.com/0then0/crondelta/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/0then0/crondelta/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/0then0/crondelta/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/0then0/crondelta/releases/tag/v0.1.0
